@@ -17,12 +17,14 @@ These services all provide a mechanism for receiving inbound emails which involv
 
 There is also a significant "SMTP-HTTP impedance mismatch". You send emails through Django's (SMTP) mail library, which provides the EmailMessage and EmailMultiAlternative objects, but you receive emails as standard (HTTP) HttpRequest.POST properties. Wouldn't it be nice if you could both send and received Django objects?
 
-This project provides a simple wrapper that converts the incoming HttpRequest back into an EmailMultiAlternatives object, and raises a Django signal that can be hooked into.
+This app converts the incoming HttpRequest back into an EmailMultiAlternatives object, and fires a signal that sends both the new object, and the original request object. You simply have to listen for this signal, and process the email as your application requires.
+
+The mail parser handles non-UTF-8 character sets (so those pesky PC Outlook emails don't come through all garbled), and file attachments.
 
 How?
 ----
 
-Internally the app contains just three files `urls.py`, `views.py` and `signals.py`. There are no models, and nothing gets recorded / stored by the app. There is a single configuration setting - `INBOUND_EMAIL_PROVIDER`, which must be one of the supported backends - ['SendGrid', 'Mandrill', 'Postmark'] - this not case-sensitive. This setting is expected to be available to the app from `django.conf.settings`, and the app will raise an error if it does not exist.
+Although this is Django app, it contains (for now at least) no models. It's principle component is a single view function that does the parsing. There is a single configuration setting - `INBOUND_EMAIL_PROVIDER`, which must be one of the supported backends (default will be 'SendGrid' as that's what we use). This setting is expected to be available to the app from `django.conf.settings`, and the app will raise an error if it does not exist.
 
 The default URL for inbound emails is simply '/inbound/'.
 
@@ -50,6 +52,16 @@ def on_email_received(sender, instance, request, **kwargs):
 email_received.connect(on_email_received, dispatch_uid="something_unique")
 ```
 
+Installation
+------------
+
+Via `pip` - details to follow.
+
+Tests
+-----
+
+There will be some.
+
 
 Configuration
 -------------
@@ -59,7 +71,24 @@ Configuration
 * Add INBOUND_EMAIL_PROVIDER setting
 * Update your provider configuration to point to app URL
 
-Progress
+Features
 --------
 
-This doesn't exist yet, as we are waiting till we finish our current workload before building this. All the functionality does exist already, in our own project (www.yunojuno.com), it just needs extracting into a separate app, tests, pluggable backends etc.
+Things it will do:
+
+* Parse HTTP requests into EmailMultiAlternatives objects
+* Pluggable backends (SendGrid only on launch)
+* Handle character encodings properly
+* Handle attachments
+
+Things it (probably) won't do:
+
+* Handle email reply parsing - use https://github.com/zapier/email-reply-parser
+
+
+Progress to date
+----------------
+
+This doesn't exist yet, as we are waiting till we finish our current workload before building this.
+
+All the functionality exists within our own project (www.yunojuno.com), it just needs extracting into a separate app, a setup.py, registration with PyPI, and so on... It'll land in May.
