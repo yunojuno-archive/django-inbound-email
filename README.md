@@ -15,7 +15,7 @@ If your project accepts inbound emails, you are probably using one of the big tr
 
 These services all provide a mechanism for receiving inbound emails which involves them (the service) parsing the inbound email and then posting the contents to an HTTP endpoint in your project. This is a great service, but it can often be fiddly to integrate into your app and it reinforces service lock-in, as each service's callback is slightly different.
 
-There is also a significant "SMTP-HTTP impedance mismatch". You send emails through Django's (SMTP) mail library, which provides the EmailMessage and EmailMultiAlternative objects, but you receive emails as standard (HTTP) HttpRequest.POST properties. Wouldn't it be nice if you could both send and received Django objects?
+There is also a significant "SMTP-HTTP impedance mismatch". You send emails through Django's (SMTP) mail library, which provides the EmailMessage and EmailMultiAlternative objects, but you receive emails as standard (HTTP) HttpRequest.POST properties. Wouldn't it be nice if you could both send and receive Django objects?
 
 This app converts the incoming HttpRequest back into an EmailMultiAlternatives object, and fires a signal that sends both the new object, and the original request object. You simply have to listen for this signal, and process the email as your application requires.
 
