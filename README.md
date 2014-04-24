@@ -95,4 +95,4 @@ Progress to date
 
 This doesn't exist yet, as we are waiting till we finish our current workload before building this.
 
-All the functionality exists within our own project (www.yunojuno.com), it just needs extracting into a separate app, a setup.py, registration with PyPI, and so on... It'll land in May.
+All the functionality exists within our own project (www.yunojuno.com), it just needs extracting into a separate app, a setup.py, registration with PyPI, and so on... It'll land in May. Possibly.
