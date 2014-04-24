@@ -34,7 +34,7 @@ The flow through the app is very simple:
 
 Your main concern is listening for the `email_received` signal, and handling it however you wish.
 
-```
+```python
 # This snippet goes somewhere inside your project,
 # wherever you need to react to incoming emails.
 from django.core.mail import EmailMultiAlternatives`
