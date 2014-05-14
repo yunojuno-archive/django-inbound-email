@@ -9,6 +9,8 @@ Please see online documentation for more details.
 """
 INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
 
+INBOUND_EMAIL_LOG_REQUESTS = False
+
 ROOT_URLCONF = 'test_app.urls'
 
 DATABASES = {

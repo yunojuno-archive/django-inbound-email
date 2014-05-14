@@ -15,7 +15,7 @@ backend = get_backend_instance()
 log_requests = getattr(settings, 'INBOUND_EMAIL_LOG_REQUESTS', False)
 
 
-def _log_inbound_email(request):
+def _log_request(request):
     """Helper function to dump out debug info."""
     logger.debug("Inbound email received:")
 
@@ -34,12 +34,10 @@ def receive_inbound_email(request):
     This view receives the email from SendGrid, parses the contents, logs
     the message and the fires the inbound_email signal.
 
-    TODO: add support for attachments
-    TODO: add support for multiple backends
     """
     # log the request.POST and request.FILES contents
     if log_requests is True:
-        _log_inbound_email(request)
+        _log_request(request)
 
     try:
         # clean up encodings and extract relevant fields from request.POST
@@ -63,4 +61,4 @@ def receive_inbound_email(request):
             status=status_code
         )
 
-    return HttpResponse(u"Successfully parsed inbound email.")
+    return HttpResponse(u"Successfully parsed inbound email.", status=200)
