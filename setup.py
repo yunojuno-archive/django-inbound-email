@@ -27,7 +27,7 @@ setup(
     include_package_data=True,
     license=open(join(dirname(__file__), 'LICENCE')).read(),
     description=meta['description'],
-    long_description=open(join(dirname(__file__), 'README.md')).read(),
+    long_description=open(join(dirname(__file__), 'README.rst')).read(),
     url='https://github.com/yunojuno/django-inbound-email',
     author=meta['author'],
     author_email='hugo@yunojuno.com',

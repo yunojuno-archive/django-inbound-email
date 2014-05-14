@@ -46,19 +46,19 @@ How?
 
 Although this is Django app, it contains (for now) no models. Its
 principle component is a single view function that does the parsing.
-There is a single configuration setting - ``INBOUND_EMAIL_PROVIDER``,
-which must be one of the supported backends (default will be 'SendGrid'
-as that's what we use). This setting is expected to be available to the
-app from ``django.conf.settings``, and the app will raise an error if it
-does not exist.
+There is a single configuration setting - ``INBOUND_EMAIL_PARSER``,
+which must be one of the supported backends.
+
+This setting is expected to be available to the app from ``django.conf.settings``,
+and the app will raise an error if it does not exist.
 
 The default URL for inbound emails is simply '/inbound/'.
 
 The flow through the app is very simple:
 
-1. The app view function ``receive_inbound`` is called when a new email
+1. The app view function ``receive_inbound_email`` is called when a new email
    POST is received from your service provider.
-2. This function looks up the ``INBOUND_EMAIL_PROVIDER``, loads the
+2. This function looks up the ``INBOUND_EMAIL_PARSER``, loads the
    appropriate backend, and parses the ``request.POST`` contents out
    into a new ``django.core.mail.EmailMultiAlternatives`` object.
 3. The ``email_received`` signal is fired, and the new
@@ -108,8 +108,9 @@ For hacking on the project, pull from Git:
 
     $ git pull git@github.com:yunojuno/django-inbound-email.git
     $ cd django-inbound-email
+    django-inbound-email$
     # use virtualenvwrapper, and install Django to allow tests to run
-    django-inbound-email $ mkvirtualenv django-inbound-email
+    django-inbound-email$ mkvirtualenv django-inbound-email
     (django-inbound-email) django-inbound-email$ pip install django
 
 Tests
@@ -126,9 +127,28 @@ Configuration
 -------------
 
 -  Install the app
--  Add the app to INSTALLED\_APPS
--  Add INBOUND\_EMAIL\_BACKEND setting
+-  Add the app to ``INSTALLED_APPS``
+-  Add ``INBOUND_EMAIL_PARSER`` setting
 -  Update your provider configuration to point to app URL
+
+::
+
+    # the fully-qualified path to the provider's backend parser
+    INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
+
+    # if True (default=False) then log the contents of each inbound request
+    INBOUND_EMAIL_LOG_REQUESTS = True
+
+    # if True (default=True) then always return HTTP status of 200 (may be required by provider)
+    INBOUND_EMAIL_RESPONSE_200 = True
+
+    # add the app to Django's INSTALL_APPS setting
+    INSTALLED_APPS = (
+        # other apps
+        # ...
+        'django_inbound_email',
+    )
+
 
 Features
 --------
