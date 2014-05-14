@@ -3,6 +3,10 @@ django-inbound
 
 An inbound email handler for Django.
 
+**Current Status**
+
+A basic working implementation, with SendGrid backend.
+
 What?
 -----
 
@@ -42,8 +46,11 @@ Your main concern, after installing and configuring the app, is handling the `em
 import logging
 from django_inbound.signals import email_received
 
-def on_email_received(sender, instance, request, **kwargs):
+def on_email_received(sender, **kwargs):
     """Handle inbound emails."""
+    email = kwargs.pop('email')
+    request = kwargs.pop('request')
+
     # your code goes here - save the email, respond to it, etc.
     logging.debug(
         "New email received from %s: %s",
@@ -59,20 +66,37 @@ email_received.connect(on_email_received, dispatch_uid="something_unique")
 Installation
 ------------
 
-Via `pip` - details to follow.
+For use as the app in Django project, use `pip`:
+
+```
+$ pip install django-inbound-email
+```
+
+For hacking on the project, pull from Git:
+
+```
+$ git pull git@github.com:yunojuno/django-inbound-email.git
+$ cd django-inbound-email
+# use virtualenvwrapper, and install Django to allow tests to run
+django-inbound-email $ mkvirtualenv django-inbound-email
+(django-inbound-email) django-inbound-email$ pip install django
+```
 
 Tests
 -----
 
-There will be some.
+There is a test django project, `test_app` that is used to run the tests.
 
+```
+(django-inbound-email) django-inbound-email$ python manage.py test
+```
 
 Configuration
 -------------
 
 * Install the app
 * Add the app to INSTALLED_APPS
-* Add INBOUND_EMAIL_PROVIDER setting
+* Add INBOUND_EMAIL_BACKEND setting
 * Update your provider configuration to point to app URL
 
 Features
