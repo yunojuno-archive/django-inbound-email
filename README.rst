@@ -5,8 +5,12 @@ An inbound email handler for Django.
 
 **Current Status**
 
+.. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
+    :target: https://travis-ci.org/yunojuno/django-inbound-email
+
 A basic working implementation, with SendGrid backend, that handles attachments,
-and has reasonable test coverage.
+and has good test coverage (+90%). The build is currently failing by design,
+as there is a feature (charsets) that is not implemented.
 
 What?
 -----
