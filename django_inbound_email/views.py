@@ -1,7 +1,5 @@
 # View functions for django-inbound-email
 # -*- coding: utf-8 -*-
-from importlib import import_module
-import json
 import logging
 
 from django.conf import settings
