@@ -10,11 +10,11 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, HttpResponse
 
 from django_inbound_email.signals import email_received
-from django_inbound_email.backends import get_backend_instance
+from django_inbound_email.backends import get_backend_instance, RequestParseError
 
 logger = logging.getLogger(__name__)
 backend = get_backend_instance()
-log_requests = getattr(settings, 'LOG_INBOUND_EMAIL_REQUESTS', False)
+log_requests = getattr(settings, 'INBOUND_EMAIL_LOG_REQUESTS', False)
 
 
 def _log_inbound_email(request):
@@ -26,22 +26,6 @@ def _log_inbound_email(request):
 
     for n, f in request.FILES.iteritems():
         logger.debug("- FILES['%s']: '%s', %sB", n, f.content_type, f.size)
-
-
-def _validate_request_fields(request, fields):
-    """Helper function to validate that certain fields exist.
-
-    Args:
-        request: the HttpRequest object to test.
-        fields: a list of field names to look for in the request.POST.
-
-    Returns:
-        bool, True if all the fields exist, else False.
-    """
-    for f in fields:
-        if f not in request.POST:
-            return False
-    return True
 
 
 @require_POST
@@ -59,15 +43,26 @@ def receive_inbound_email(request):
     if log_requests is True:
         _log_inbound_email(request)
 
-    if not _validate_request_fields(request, ['to', 'from', 'subject']):
-        # NB even if we have a problem, always use HTTP_STATUS=200, as
-        # otherwise the email service will continue polling us with the email.
-        return HttpResponse(u"Unable to parse inbound email.", status=200)
+    try:
+        # clean up encodings and extract relevant fields from request.POST
+        email = backend.parse(request)
 
-    # clean up encodings and extract relevant fields from request.POST
-    email = backend.parse(request)
+        # fire the signal
+        email_received.send(sender=None, email=email, request=request)
 
-    # fire the signal
-    email_received.send(sender=None, email=email, request=request)
+    except RequestParseError as ex:
+        logger.exception(ex)
+        if getattr(settings, 'INBOUND_EMAIL_RESPONSE_200', True):
+            # NB even if we have a problem, always use HTTP_STATUS=200, as
+            # otherwise the email service will continue polling us with the email.
+            # This is the default behaviour.
+            status_code = 200
+        else:
+            status_code = 400
+
+        return HttpResponse(
+            u"Unable to parse inbound email: %s" % ex,
+            status=status_code
+        )
 
     return HttpResponse(u"Successfully parsed inbound email.")

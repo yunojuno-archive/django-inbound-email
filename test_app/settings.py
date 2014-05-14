@@ -21,6 +21,7 @@ DATABASES = {
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django_inbound_email',
     'test_app',
 )
 

@@ -1,8 +1,9 @@
 # sendgrid specific request parser.
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
+from django.utils.datastructures import MultiValueDictKeyError
 
-from django_inbound_email.backends import RequestParser
+from django_inbound_email.backends import RequestParser, RequestParseError
 from django_inbound_email.exceptions import EmailParseError
 
 
@@ -27,13 +28,17 @@ class SendGridRequestParser(RequestParser):
         """
         assert isinstance(request, HttpRequest), "Invalid request type: %s" % type(request)
 
-        subject = request.POST.get('subject')
-        from_email = request.POST.get('from')
-        to_email = request.POST.get('to', u"").split(',')
-        text = request.POST.get('text')
-        html = request.POST.get('html', u"")
-        cc = request.POST.get('cc', u"").split(',')
-        bcc = request.POST.get('bcc', u"").split(',')
+        try:
+            subject = request.POST['subject']
+            from_email = request.POST['from']
+            to_email = request.POST['to'].split(',')
+            text = request.POST['text']
+            html = request.POST['html']
+            cc = request.POST['cc'].split(',')
+            bcc = request.POST.get('bcc', u"").split(',')
+
+        except MultiValueDictKeyError as ex:
+            raise RequestParseError(u"Inbound request is missing required value: %s." % ex)
 
         email = EmailMultiAlternatives(
             subject=subject,

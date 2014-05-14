@@ -30,13 +30,25 @@ class SendGridTests(TestCase):
             status_code=200
         )
 
-    def test_parse_invalid_request(self):
-        """Test that an invalid POST returns a 200, but with a different body."""
+    def test_parse_invalid_request_200(self):
+        """Test that an invalid POST returns a 200, if so configured."""
+        settings.INBOUND_EMAIL_RESPONSE_200 = True
         response = self.client.post(self.url, data={})
         self.assertContains(
             response,
-            "Unable to parse inbound email.",
+            "Unable to parse inbound email",
             status_code=200
+        )
+
+    def test_parse_invalid_request_400(self):
+        """Test that an invalid POST returns a 400 if so configured."""
+        settings.INBOUND_EMAIL_RESPONSE_200 = False
+        from django_inbound_email.views import receive_inbound_email
+        response = self.client.post(self.url, data={})
+        self.assertContains(
+            response,
+            "Unable to parse inbound email",
+            status_code=400
         )
 
     def test_email_received_signal(self):
@@ -73,7 +85,22 @@ class SendGridTests(TestCase):
 
     def test_text_email_only(self):
         """Test inbound email with no HTML alternative."""
-        self.fail("Write test for text only emails.")
+        data = test_inbound_payload
+        data['html'] = ""
+        self.request = self.factory.post(self.url, data=data)
+
+        def on_email_received(sender, **kwargs):
+            email = kwargs.pop('email', None)
+            self.assertEqual(len(email.alternatives), 0)
+
+        email_received.connect(on_email_received)
+        response = receive_inbound_email(self.request)
+        email_received.disconnect(on_email_received)
+        self.assertContains(
+            response,
+            "Successfully parsed inbound email.",
+            status_code=200
+        )
 
     def test_attachments(self):
         """Test inbound email with attachments."""

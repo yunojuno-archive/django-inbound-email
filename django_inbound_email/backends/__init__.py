@@ -4,6 +4,11 @@ from importlib import import_module
 from django.conf import settings
 
 
+class RequestParseError(Exception):
+    """Error raised when the inbound request could not be parsed."""
+    pass
+
+
 def get_backend_class():
     """Return reference to the configured backed class."""
     # this will (intentionally) blow up if the setting does not exist
@@ -39,6 +44,9 @@ class RequestParser():
         * text - the text version of the email
         * subject - the subject line
         * attachments
+
+        Inheriting classes should raise RequestParseError if the inbound request
+        cannot be converted successfully.
 
         """
         raise NotImplementedError(u"Must be implemented by inheriting class.")
