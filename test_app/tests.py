@@ -7,6 +7,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test import TestCase
+from django.utils.encoding import smart_text
 
 from django_inbound_email.backends import get_backend_instance, RequestParseError
 from django_inbound_email.backends.sendgrid import SendGridRequestParser
@@ -14,6 +15,7 @@ from django_inbound_email.signals import email_received
 from django_inbound_email.views import receive_inbound_email, _log_request
 
 from test_app.test_files.sendgrid_post import test_inbound_payload
+from test_app.test_files.sendgrid_post_windows_1252 import test_inbound_payload_1252
 
 
 class ViewFunctionTests(TestCase):
@@ -158,4 +160,7 @@ class SendGridRequestParserTests(TestCase):
 
     def test_encodings(self):
         """Test inbound email with non-UTF8 encoded fields."""
-        self.fail("Write test for non-default encodings.")
+        data = test_inbound_payload_1252
+        request = self.factory.post(self.url, data=data)
+        email = self.parser.parse(request)
+        self.assertEqual(email.body, smart_text(data['text'], encoding='windows-1252'))
