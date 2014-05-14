@@ -54,8 +54,8 @@ def on_email_received(sender, **kwargs):
     # your code goes here - save the email, respond to it, etc.
     logging.debug(
         "New email received from %s: %s",
-        instance.from_email,
-        instance.subject
+        email.from_email,
+        email.subject
     )
 
 # pass dispatch_uid to prevent duplicates:
