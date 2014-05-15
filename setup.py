@@ -5,7 +5,6 @@ import os
 from setuptools import setup
 
 README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
-LICENCE = open(os.path.join(os.path.dirname(__file__), 'LICENCE')).read()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -27,7 +26,6 @@ setup(
     packages=['django_inbound_email'],
     install_requires=['django>=1.6'],
     include_package_data=True,
-    license=LICENCE,
     description=meta['description'],
     long_description=README,
     url='https://github.com/yunojuno/django-inbound-email',
@@ -37,7 +35,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
