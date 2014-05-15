@@ -11,13 +11,14 @@ An inbound email handler for Django.
 A basic working implementation, with SendGrid backend, that handles attachments.
 
 The test_app is deployed to Heroku and any emails sent to
-django-inbound-email@yunojuno.com will be parsed by a live version of the app.
-This test parser just does a bounceback - any incoming email to that address
-is sent back to the sender. This makes it easy to test 'real-world' email
-examples. NB The app deployed on Heroku currently sends emails using the
+anything@django-inbound-email.yunojuno.com will be parsed by a live
+version of the app. This test parser just does a bounceback - any
+incoming email to that address is sent back to the sender. This
+makes it easy to test 'real-world' email examples.
+
+NB The app deployed on Heroku currently sends emails using the
 Mailtrap app, so you won't actually receive the email, but I can
 give limited access to contributors to test with.
-
 
 What?
 -----
