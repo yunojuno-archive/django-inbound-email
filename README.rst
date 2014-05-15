@@ -8,9 +8,16 @@ An inbound email handler for Django.
 .. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
     :target: https://travis-ci.org/yunojuno/django-inbound-email
 
-A basic working implementation, with SendGrid backend, that handles attachments,
-and has good test coverage (+90%). The build is currently failing by design,
-as there is a feature (charsets) that is not implemented.
+A basic working implementation, with SendGrid backend, that handles attachments.
+
+The test_app is deployed to Heroku and any emails sent to
+django-inbound-email@yunojuno.com will be parsed by a live version of the app.
+This test parser just does a bounceback - any incoming email to that address
+is sent back to the sender. This makes it easy to test 'real-world' email
+examples. NB The app deployed on Heroku currently sends emails using the
+Mailtrap app, so you won't actually receive the email, but I can
+give limited access to contributors to test with.
+
 
 What?
 -----
