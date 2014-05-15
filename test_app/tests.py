@@ -158,9 +158,24 @@ class SendGridRequestParserTests(TestCase):
         self.assertEqual(attachments['attachment2'][0], attachment_2)
         self.assertEqual(attachments['attachment2'][1], 'image/jpeg')
 
+    def test_attachments_max_size(self):
+        """Test inbound email attachment max size limit."""
+        settings.INBOUND_EMAIL_ATTACHMENT_SIZE_MAX = 0
+        data = test_inbound_payload
+        attachment_1 = open(self.test_upload_txt, 'r').read()
+        attachment_2 = open(self.test_upload_png, 'r').read()
+        data['attachment1'] = open(self.test_upload_txt, 'r')
+        data['attachment2'] = open(self.test_upload_png, 'r')
+        request = self.factory.post(self.url, data=data)
+        parser = get_backend_instance()
+        email = parser.parse(request)
+
+        # for each attachmen, check the contents match the input
+        self.assertEqual(len(email.attachments), 0)
+
     def test_encodings(self):
         """Test inbound email with non-UTF8 encoded fields."""
         data = test_inbound_payload_1252
         request = self.factory.post(self.url, data=data)
         email = self.parser.parse(request)
-        self.assertEqual(email.body, smart_text(data['text'], encoding='windows-1252'))
+        self.assertEqual(email.body, smart_text(data['text']))

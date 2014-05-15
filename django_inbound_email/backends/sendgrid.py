@@ -87,6 +87,13 @@ class SendGridRequestParser(RequestParser):
 
         # TODO: this won't cope with big files - should really read in in chunks
         for n, f in request.FILES.iteritems():
-            email.attach(n, f.read(), f.content_type)
+            if f.size > self.max_file_size:
+                logger.debug(
+                    u"File attachment %s is too large to process (%sB)",
+                    f.name,
+                    f.size
+                )
+            else:
+                email.attach(n, f.read(), f.content_type)
 
         return email

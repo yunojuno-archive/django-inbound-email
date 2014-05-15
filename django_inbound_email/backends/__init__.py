@@ -31,6 +31,11 @@ def get_backend_instance():
 class RequestParser():
     """Abstract base class, to be implemented by service-specific classes."""
 
+    @property
+    def max_file_size(self):
+        """The maximum file size to process as an attachment (default=10MB)."""
+        return getattr(settings, 'INBOUND_EMAIL_ATTACHMENT_SIZE_MAX', 10000000)
+
     def parse(self, request):
         """Parse a request object into an EmailMultiAlternatives instance.
 

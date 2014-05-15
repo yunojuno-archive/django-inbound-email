@@ -7,9 +7,14 @@ up django.contrib.auth users.
 
 Please see online documentation for more details.
 """
+# the HTTP request parser to use
 INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
 
+# whether to dump out a log of all incoming email requests
 INBOUND_EMAIL_LOG_REQUESTS = False
+
+# the max size (in Bytes) of any attachment to process
+INBOUND_EMAIL_ATTACHMENT_SIZE_MAX = 10000000
 
 ROOT_URLCONF = 'test_app.urls'
 
