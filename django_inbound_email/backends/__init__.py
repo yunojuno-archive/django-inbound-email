@@ -12,13 +12,11 @@ class RequestParseError(Exception):
 def get_backend_class():
     """Return reference to the configured backed class."""
     # this will (intentionally) blow up if the setting does not exist
-    # grab the classname off of the backend string
+    assert hasattr(settings, 'INBOUND_EMAIL_PARSER')
+    assert getattr(settings, 'INBOUND_EMAIL_PARSER') is not None
+
     package, klass = settings.INBOUND_EMAIL_PARSER.rsplit('.', 1)
-
-    # dynamically import the module, in this case app.backends.adapter_a
     module = import_module(package)
-
-    # pull the class off the module and return
     return getattr(module, klass)
 
 
@@ -26,7 +24,6 @@ def get_backend_instance():
     """Dynamically create an instance of the configured backend class."""
     backend = get_backend_class()
     return backend()
-
 
 class RequestParser():
     """Abstract base class, to be implemented by service-specific classes."""

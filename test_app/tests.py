@@ -17,6 +17,9 @@ from django_inbound_email.views import receive_inbound_email, _log_request
 from test_app.test_files.sendgrid_post import test_inbound_payload
 from test_app.test_files.sendgrid_post_windows_1252 import test_inbound_payload_1252
 
+# don't read it out of the settings - fix it here so we know what we're using
+DEFAULT_TEST_PARSER = "django_inbound_email.backends.sendgrid.SendGridRequestParser"
+
 
 class ViewFunctionTests(TestCase):
     """Tests for the inbound view function receive_inbound_email.
@@ -33,6 +36,9 @@ class ViewFunctionTests(TestCase):
         self.factory = RequestFactory()
         self.url = reverse('receive_inbound_email')
         self.parser = SendGridRequestParser()  # use a known entity for now.
+
+        # need to have something here to pass the ViewFunctionTests
+        settings.INBOUND_EMAIL_PARSER = DEFAULT_TEST_PARSER
 
     def test_log_inbound_requests(self):
         """Test the internal log function."""

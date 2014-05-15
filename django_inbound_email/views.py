@@ -11,13 +11,12 @@ from django_inbound_email.signals import email_received
 from django_inbound_email.backends import get_backend_instance, RequestParseError
 
 logger = logging.getLogger(__name__)
-backend = get_backend_instance()
 log_requests = getattr(settings, 'INBOUND_EMAIL_LOG_REQUESTS', False)
 
 
 def _log_request(request):
     """Helper function to dump out debug info."""
-    logger.debug("Inbound email received:")
+    logger.debug("Inbound email received")
 
     for k, v in request.POST.iteritems():
         logger.debug("- POST['%s']='%s'" % (k, v))
@@ -41,6 +40,7 @@ def receive_inbound_email(request):
 
     try:
         # clean up encodings and extract relevant fields from request.POST
+        backend = get_backend_instance()
         email = backend.parse(request)
 
         # fire the signal
