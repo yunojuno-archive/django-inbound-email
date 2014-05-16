@@ -32,6 +32,13 @@ A Django app to make it easy to receive inbound emails from users via a
 hosted transactional email service (e.g. SendGrid, Postmark, Mandrill,
 etc.)
 
+Contained within this project is the django app itself, together with
+a working Django project that uses the app, and is separately deployable
+to Heroku for testing purposes. The app has good test coverage, but it's
+really very hard to test inbound emails without having real data, and
+that requires a public endpoint that you can use to hook up your
+preferred email provider's webhooks.
+
 Why?
 ----
 
