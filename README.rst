@@ -123,13 +123,13 @@ Installation
 
 For use as the app in Django project, use ``pip``:
 
-::
+.. code:: shell
 
     $ pip install django-inbound-email
 
 For hacking on the project, pull from Git:
 
-::
+.. code:: shell
 
     $ git pull git@github.com:yunojuno/django-inbound-email.git
     $ cd django-inbound-email
@@ -144,7 +144,7 @@ Tests
 There is a test django project, ``test_app`` that is used to run the
 tests.
 
-::
+.. code:: shell
 
     (django-inbound-email) django-inbound-email$ python manage.py test
 
@@ -156,7 +156,7 @@ Configuration
 -  Add ``INBOUND_EMAIL_PARSER`` setting
 -  Update your provider configuration to point to app URL
 
-::
+.. code:: shell
 
     # the fully-qualified path to the provider's backend parser
     INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
