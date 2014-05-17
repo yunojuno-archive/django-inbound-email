@@ -156,7 +156,7 @@ Configuration
 -  Add ``INBOUND_EMAIL_PARSER`` setting
 -  Update your provider configuration to point to app URL
 
-.. code:: shell
+.. code:: python
 
     # the fully-qualified path to the provider's backend parser
     INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
