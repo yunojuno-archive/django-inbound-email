@@ -100,7 +100,7 @@ the ``email_received`` signal:
     # This snippet goes somewhere inside your project,
     # wherever you need to react to incoming emails.
     import logging
-    from django_inbound.signals import email_received
+    from django_inbound_email.signals import email_received
 
     def on_email_received(sender, **kwargs):
         """Handle inbound emails."""
