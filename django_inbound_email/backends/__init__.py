@@ -9,6 +9,16 @@ class RequestParseError(Exception):
     pass
 
 
+class AttachmentTooLargeError(Exception):
+    """Error raised when an attachment is too large."""
+
+    def __init__(self, email, filename, size):
+        super(AttachmentTooLargeError, self)
+        self.email = email
+        self.filename = filename
+        self.size = size
+
+
 def get_backend_class():
     """Return reference to the configured backed class."""
     # this will (intentionally) blow up if the setting does not exist
@@ -24,6 +34,7 @@ def get_backend_instance():
     """Dynamically create an instance of the configured backend class."""
     backend = get_backend_class()
     return backend()
+
 
 class RequestParser():
     """Abstract base class, to be implemented by service-specific classes."""
