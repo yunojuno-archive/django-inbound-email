@@ -92,6 +92,29 @@ The flow through the app is very simple:
    you require - e.g. DKIM / SPF info, if your provider passes that
    along).
 
+Installation
+------------
+
+For use as the app in Django project, use ``pip``:
+
+.. code:: shell
+
+    $ pip install django-inbound-email
+
+For hacking on the project, pull from Git:
+
+.. code:: shell
+
+    $ git pull git@github.com:yunojuno/django-inbound-email.git
+    $ cd django-inbound-email
+    django-inbound-email$
+    # use virtualenvwrapper, and install Django to allow tests to run
+    django-inbound-email$ mkvirtualenv django-inbound-email
+    (django-inbound-email) django-inbound-email$ pip install django
+
+Usage
+-----
+
 Your main concern, after installing and configuring the app, is handling
 the ``email_received`` signal:
 
@@ -117,26 +140,6 @@ the ``email_received`` signal:
     # pass dispatch_uid to prevent duplicates:
     # https://docs.djangoproject.com/en/dev/topics/signals/
     email_received.connect(on_email_received, dispatch_uid="something_unique")
-
-Installation
-------------
-
-For use as the app in Django project, use ``pip``:
-
-.. code:: shell
-
-    $ pip install django-inbound-email
-
-For hacking on the project, pull from Git:
-
-.. code:: shell
-
-    $ git pull git@github.com:yunojuno/django-inbound-email.git
-    $ cd django-inbound-email
-    django-inbound-email$
-    # use virtualenvwrapper, and install Django to allow tests to run
-    django-inbound-email$ mkvirtualenv django-inbound-email
-    (django-inbound-email) django-inbound-email$ pip install django
 
 Tests
 -----
