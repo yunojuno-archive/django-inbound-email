@@ -92,6 +92,10 @@ The flow through the app is very simple:
    you require - e.g. DKIM / SPF info, if your provider passes that
    along).
 
+If an email is unacceptable in some way (e.g. an attachment is too large),
+then the ``email_received_unacceptable`` signal is fired instead. This signal
+has an argument ``exception`` describing the problem.
+
 Installation
 ------------
 
@@ -186,7 +190,7 @@ Things it will do:
 -  Parse HTTP requests into EmailMultiAlternatives objects
 -  Pluggable backends (SendGrid only on launch)
 -  Handle character encodings properly
--  Handle attachments
+-  Handle attachments, including if they are too large
 
 Things it (probably) won't do:
 

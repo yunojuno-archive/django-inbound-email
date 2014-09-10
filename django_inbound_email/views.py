@@ -4,11 +4,15 @@ import logging
 
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, HttpResponse
 
-from django_inbound_email.signals import email_received
-from django_inbound_email.backends import get_backend_instance, RequestParseError
+from django_inbound_email.signals import email_received, email_received_unacceptable
+from django_inbound_email.backends import (
+    get_backend_instance,
+    RequestParseError,
+    AttachmentTooLargeError,
+)
+
 
 logger = logging.getLogger(__name__)
 log_requests = getattr(settings, 'INBOUND_EMAIL_LOG_REQUESTS', False)
@@ -45,6 +49,15 @@ def receive_inbound_email(request):
 
         # fire the signal
         email_received.send(sender=None, email=email, request=request)
+
+    except AttachmentTooLargeError as ex:
+        logger.exception(ex)
+        email_received_unacceptable.send(
+            sender=None,
+            email=ex.email,
+            request=request,
+            exception=ex
+        )
 
     except RequestParseError as ex:
         logger.exception(ex)

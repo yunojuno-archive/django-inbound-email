@@ -7,7 +7,12 @@ from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import smart_text
 
-from django_inbound_email.backends import RequestParser, RequestParseError
+from django_inbound_email.backends import (
+    RequestParser,
+    RequestParseError,
+    AttachmentTooLargeError,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +97,11 @@ class SendGridRequestParser(RequestParser):
                     u"File attachment %s is too large to process (%sB)",
                     f.name,
                     f.size
+                )
+                raise AttachmentTooLargeError(
+                    email=email,
+                    filename=f.name,
+                    size=f.size
                 )
             else:
                 email.attach(n, f.read(), f.content_type)

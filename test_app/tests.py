@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
 from os import path
 
 from django.conf import settings
@@ -9,9 +8,13 @@ from django.test.client import RequestFactory
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from django_inbound_email.backends import get_backend_instance, RequestParseError
+from django_inbound_email.backends import (
+    get_backend_instance,
+    RequestParseError,
+    AttachmentTooLargeError
+)
 from django_inbound_email.backends.sendgrid import SendGridRequestParser
-from django_inbound_email.signals import email_received
+from django_inbound_email.signals import email_received, email_received_unacceptable
 from django_inbound_email.views import receive_inbound_email, _log_request
 
 from test_app.test_files.sendgrid_post import test_inbound_payload
@@ -39,6 +42,8 @@ class ViewFunctionTests(TestCase):
 
         # need to have something here to pass the ViewFunctionTests
         settings.INBOUND_EMAIL_PARSER = DEFAULT_TEST_PARSER
+
+        self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
 
     def test_log_inbound_requests(self):
         """Test the internal log function."""
@@ -72,6 +77,7 @@ class ViewFunctionTests(TestCase):
 
         request = self.factory.post(self.url, data=test_inbound_payload)
 
+        # define handler
         def on_email_received(sender, **kwargs):
             self.on_email_received_fired = True
             self.assertIsNone(sender)
@@ -81,11 +87,43 @@ class ViewFunctionTests(TestCase):
             self.assertIsInstance(email, EmailMultiAlternatives)
             self.assertIsNotNone(request)
 
+        # connect handler
         email_received.connect(on_email_received)
         self.on_email_received_fired = False
 
         # fire a request in to force the signal to fire
-        response = receive_inbound_email(request)
+        receive_inbound_email(request)
+        self.assertTrue(self.on_email_received_fired)
+
+    def test_email_received_unacceptable_signal_fired_for_too_large_attachment(self):
+        # set a zero allowed max attachment size
+        settings.INBOUND_EMAIL_ATTACHMENT_SIZE_MAX = 0
+
+        # add attachment to payload
+        data = test_inbound_payload
+        data['attachment'] = open(self.test_upload_txt, 'r')
+
+        request = self.factory.post(self.url, data=data)
+
+        # define handler
+        def on_email_received(sender, **kwargs):
+            self.on_email_received_fired = True
+            self.assertIsNone(sender)
+            request = kwargs.pop('request', None)
+            email = kwargs.pop('email', None)
+            exception = kwargs.pop('exception', None)
+
+            self.assertIsNotNone(request)
+            self.assertIsInstance(email, EmailMultiAlternatives)
+            self.assertIsInstance(exception, AttachmentTooLargeError)
+            self.assertEqual(exception.filename, 'test_upload_file.txt')
+
+        # connect handler
+        email_received_unacceptable.connect(on_email_received)
+        self.on_email_received_fired = False
+
+        # fire a request in to force the signal to fire
+        receive_inbound_email(request)
         self.assertTrue(self.on_email_received_fired)
 
 
@@ -166,18 +204,21 @@ class SendGridRequestParserTests(TestCase):
 
     def test_attachments_max_size(self):
         """Test inbound email attachment max size limit."""
+        # set a zero allowed max attachment size
         settings.INBOUND_EMAIL_ATTACHMENT_SIZE_MAX = 0
+
+        # receive an email
         data = test_inbound_payload
-        attachment_1 = open(self.test_upload_txt, 'r').read()
-        attachment_2 = open(self.test_upload_png, 'r').read()
+        open(self.test_upload_txt, 'r').read()
+        open(self.test_upload_png, 'r').read()
         data['attachment1'] = open(self.test_upload_txt, 'r')
         data['attachment2'] = open(self.test_upload_png, 'r')
         request = self.factory.post(self.url, data=data)
         parser = get_backend_instance()
-        email = parser.parse(request)
 
-        # for each attachmen, check the contents match the input
-        self.assertEqual(len(email.attachments), 0)
+        # should except
+        with self.assertRaises(AttachmentTooLargeError):
+            parser.parse(request),
 
     def test_encodings(self):
         """Test inbound email with non-UTF8 encoded fields."""
