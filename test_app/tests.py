@@ -8,8 +8,8 @@ from django.test.client import RequestFactory
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from django_inbound_email.backends import (
-    get_backend_instance,
+from django_inbound_email.backends import get_backend_instance
+from django_inbound_email.errors import (
     RequestParseError,
     AttachmentTooLargeError
 )
