@@ -80,7 +80,7 @@ class ViewFunctionTests(TestCase):
         # define handler
         def on_email_received(sender, **kwargs):
             self.on_email_received_fired = True
-            self.assertIsNone(sender)
+            self.assertEqual(sender, SendGridRequestParser)
             request = kwargs.pop('request', None)
             email = kwargs.pop('email', None)
             self.assertIsNotNone(email)
@@ -108,11 +108,10 @@ class ViewFunctionTests(TestCase):
         # define handler
         def on_email_received(sender, **kwargs):
             self.on_email_received_fired = True
-            self.assertIsNone(sender)
             request = kwargs.pop('request', None)
             email = kwargs.pop('email', None)
             exception = kwargs.pop('exception', None)
-
+            self.assertEqual(sender, SendGridRequestParser)
             self.assertIsNotNone(request)
             self.assertIsInstance(email, EmailMultiAlternatives)
             self.assertIsInstance(exception, AttachmentTooLargeError)
