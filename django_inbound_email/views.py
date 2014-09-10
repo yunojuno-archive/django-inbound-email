@@ -48,12 +48,12 @@ def receive_inbound_email(request):
         email = backend.parse(request)
 
         # fire the signal
-        email_received.send(sender=None, email=email, request=request)
+        email_received.send(sender=backend.__class__, email=email, request=request)
 
     except AttachmentTooLargeError as ex:
         logger.exception(ex)
         email_received_unacceptable.send(
-            sender=None,
+            sender=backend.__class__,
             email=ex.email,
             request=request,
             exception=ex
