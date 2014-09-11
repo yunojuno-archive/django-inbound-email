@@ -23,7 +23,7 @@ for l in [line for line in tuple(open('django_inbound_email/__init__.py', 'r')) 
 setup(
     name=meta['title'],
     version=meta['version'],
-    packages=['django_inbound_email'],
+    packages=['django_inbound_email', 'django_inbound_email.backends'],
     install_requires=['django>=1.6'],
     include_package_data=True,
     description=meta['description'],
