@@ -7,8 +7,8 @@ from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import smart_text
 
-from django_inbound_email.backends import (
-    RequestParser,
+from django_inbound_email.backends import RequestParser
+from django_inbound_email.errors import (
     RequestParseError,
     AttachmentTooLargeError,
 )

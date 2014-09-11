@@ -7,8 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, HttpResponse
 
 from django_inbound_email.signals import email_received, email_received_unacceptable
-from django_inbound_email.backends import (
-    get_backend_instance,
+from django_inbound_email.backends import get_backend_instance
+from django_inbound_email.errors import (
     RequestParseError,
     AttachmentTooLargeError,
 )
