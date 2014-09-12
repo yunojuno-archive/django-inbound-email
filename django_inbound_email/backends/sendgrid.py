@@ -104,6 +104,6 @@ class SendGridRequestParser(RequestParser):
                     size=f.size
                 )
             else:
-                email.attach(n, f.read(), f.content_type)
+                email.attach(f.name, f.read(), f.content_type)
 
         return email

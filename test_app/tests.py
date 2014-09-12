@@ -196,10 +196,10 @@ class SendGridRequestParserTests(TestCase):
 
         # convert list of 3-tuples into dict so we can lookup by filename
         attachments = {k[0]: (k[1], k[2]) for k in email.attachments}
-        self.assertEqual(attachments['attachment1'][0], attachment_1)
-        self.assertEqual(attachments['attachment1'][1], 'text/plain')
-        self.assertEqual(attachments['attachment2'][0], attachment_2)
-        self.assertEqual(attachments['attachment2'][1], 'image/jpeg')
+        self.assertEqual(attachments['test_upload_file.txt'][0], attachment_1)
+        self.assertEqual(attachments['test_upload_file.txt'][1], 'text/plain')
+        self.assertEqual(attachments['test_upload_file.jpg'][0], attachment_2)
+        self.assertEqual(attachments['test_upload_file.jpg'][1], 'image/jpeg')
 
     def test_attachments_max_size(self):
         """Test inbound email attachment max size limit."""
