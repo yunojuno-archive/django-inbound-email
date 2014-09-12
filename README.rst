@@ -145,6 +145,45 @@ the ``email_received`` signal:
     # https://docs.djangoproject.com/en/dev/topics/signals/
     email_received.connect(on_email_received, dispatch_uid="something_unique")
 
+Handling file attachments as FileField properties
+-------------------------------------------------
+
+There is one gotcha in the handling of file attachments. The email
+object that is sent via the signal has an ``attachments`` property,
+but this contains a list of 3-tuples [(name, contents, content_type),],
+not a list of file objects. In order to store the attachments against
+a model as a FileField, you'll need to convert the tuples back into
+something that Django can deal with.
+
+.. code:: python
+
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from django.db import models
+
+    from django_inbound_email.signals import email_received
+
+
+    def get_file(attachment):
+        """Convert email.attachment tuple into a SimpleUploadedFile."""
+        name, content, content_type = attachment
+        return SimpleUploadedFile(name, content, content_type)
+
+
+    class Example(models.Model):
+        """Example model that contains a FileField property."""
+        file = models.FileField()
+
+
+    def on_email_received(sender, **kwargs):
+        """Handle inbound emails."""
+        email = kwargs.pop('email')
+        for attachment in email.attachments:
+            # we must convert attachment tuple into a file
+            # before adding as the property.
+            example = Example(file=get_file(attachment))
+            example.save()
+
+
 Tests
 -----
 
