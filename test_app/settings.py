@@ -74,6 +74,9 @@ INSTALLED_APPS = (
     'test_app',
 )
 
+# none required, but need to explicitly state this for Django 1.7
+MIDDLEWARE_CLASSES = []
+
 SECRET_KEY = "something really, really hard to guess goes here."
 
 LOGGING = {
