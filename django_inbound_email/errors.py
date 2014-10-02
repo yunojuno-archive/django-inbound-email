@@ -12,5 +12,3 @@ class AttachmentTooLargeError(Exception):
         self.email = email
         self.filename = filename
         self.size = size
-
-

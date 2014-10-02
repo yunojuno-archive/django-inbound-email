@@ -13,7 +13,6 @@ from django_inbound_email.errors import (
     AttachmentTooLargeError,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
