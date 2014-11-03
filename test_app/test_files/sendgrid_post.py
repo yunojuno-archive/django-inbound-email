@@ -9,7 +9,7 @@ Sent with Unibox
 """
 test_inbound_payload['charsets'] = '{"to":"UTF-8","html":"utf-8","subject":"UTF-8","from":"UTF-8","text":"utf-8"}'
 test_inbound_payload['subject'] = 'test'
-test_inbound_payload['to'] = '<to@example.com'
+test_inbound_payload['to'] = '<to@example.com>'
 test_inbound_payload['cc'] = '<b@example.com>, <c@example.com>'
 test_inbound_payload['spam_score'] = '0.266'
 test_inbound_payload['html'] = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
