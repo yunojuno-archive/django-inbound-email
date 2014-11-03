@@ -2,6 +2,8 @@
 import json
 import logging
 
+from email.utils import getaddresses
+
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
@@ -50,6 +52,25 @@ def _decode_POST_value(request, field_name, default=None):
 class SendGridRequestParser(RequestParser):
     """SendGrid request parser."""
 
+    def _get_addresses(self, string, retain_name=False):
+        """
+        Takes RFC-compliant email addresses in both terse (email only)
+        and verbose (name + email) forms and returns a list of
+        email address strings
+
+        (TODO: breaking change that returns a tuple of (name, email) per string)
+        """
+        if retain_name:
+            raise NotImplementedError(
+                "Not yet implemented, but will need client-code changes too"
+            )
+
+        # We trust than an email address contains an "@" after
+        # email.utils.getaddresses has done the hard work. If we wanted
+        # to we could use a regex to check for greater email validity
+        output = [x[1] for x in getaddresses(string) if "@" in x[1]]
+        return output
+
     def parse(self, request):
         """Parse incoming request and return an email instance.
 
@@ -67,13 +88,19 @@ class SendGridRequestParser(RequestParser):
         assert isinstance(request, HttpRequest), "Invalid request type: %s" % type(request)
 
         try:
+            from_email = self._get_addresses([_decode_POST_value(request, 'from')])
+            to_email = self._get_addresses([_decode_POST_value(request, 'to')])
+            cc = self._get_addresses([_decode_POST_value(request, 'cc', default='')])
+            bcc = self._get_addresses([_decode_POST_value(request, 'bcc', default='')])
+
             subject = _decode_POST_value(request, 'subject')
-            from_email = _decode_POST_value(request, 'from')
-            to_email = _decode_POST_value(request, 'to').split(',')
             text = _decode_POST_value(request, 'text')
             html = _decode_POST_value(request, 'html', default='')
-            cc = _decode_POST_value(request, 'cc', default='').split(',')
-            bcc = _decode_POST_value(request, 'bcc', default='').split(',')
+
+        except IndexError as ex:
+            raise RequestParseError(
+                u"Inbound request lacks a valid from address: %s." % request.get('from')
+            )
 
         except MultiValueDictKeyError as ex:
             raise RequestParseError(u"Inbound request is missing required value: %s." % ex)

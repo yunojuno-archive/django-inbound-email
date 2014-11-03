@@ -143,13 +143,35 @@ class SendGridRequestParserTests(TestCase):
             data: a dict of data that was sent to the parser.
 
         """
+        self.parser = SendGridRequestParser()
+
         self.assertIsInstance(email, EmailMultiAlternatives)
-        self.assertEqual(email.to, data.get('to', u'').split(','))
-        self.assertEqual(email.from_email, data.get('from', u''))
+        self.assertEqual(
+            email.to,
+            self.parser._get_addresses(
+                [data.get('to', u'')]
+            )
+        )
+        self.assertEqual(
+            email.from_email,
+            self.parser._get_addresses(
+                [data.get('from', u'')]
+            )
+        )
         self.assertEqual(email.subject, data.get('subject', u''))
         self.assertEqual(email.body, data.get('text', u''))
-        self.assertEqual(email.cc, data.get('cc', u'').split(','))
-        self.assertEqual(email.bcc, data.get('bcc', u'').split(','))
+        self.assertEqual(
+            email.cc,
+            self.parser._get_addresses(
+                [data.get('cc', u'')]
+            )
+        )
+        self.assertEqual(
+            email.bcc,
+            self.parser._get_addresses(
+                [data.get('bcc', u'')]
+            )
+        )
         if 'html' in data:
             self.assertEqual(len(email.alternatives), 1)
             self.assertEqual(email.alternatives[0][0], data.get('html', u''))
@@ -161,6 +183,145 @@ class SendGridRequestParserTests(TestCase):
         self.parser = SendGridRequestParser()
         self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
         self.test_upload_png = path.join(path.dirname(__file__), 'test_files/test_upload_file.jpg')
+
+    def test_recipient_field_parsing(self):
+        for payload_changes, attr_name, expected in [
+            # TO
+            (
+                {"to": 'jed@whitehouse.gov'},
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"to": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "to",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"to": '"Bartlet, Jed" <jed@whitehouse.gov>'},
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"to": 'Jed Bartlet <jed@whitehouse.gov>'},
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"to": '"Bartlet, Jed" <jed@whitehouse.gov>, "Zeigler, Toby" <toby@whitehouse.gov'},
+                "to",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"to": 'Jed Bartlet <jed@whitehouse.gov>, Toby Ziegler <toby@whitehouse.gov'},
+                "to",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"to": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "to",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+
+            # FROM
+            (
+                {"from": 'jed@whitehouse.gov'},
+                "from_email",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"from": '"Bartlet, Jed" <jed@whitehouse.gov>'},
+                "from_email",
+                ['jed@whitehouse.gov'],
+            ),
+
+            # CC
+            (
+                {"cc": 'jed@whitehouse.gov'},
+                "cc",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"cc": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "cc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"cc": '"Bartlet, Jed" <jed@whitehouse.gov>'},
+                "cc",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"cc": '"Bartlet, Jed" <jed@whitehouse.gov>, "Zeigler, Toby" <toby@whitehouse.gov'},
+                "cc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"cc": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "cc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+
+            # BCC
+            (
+                {"bcc": 'jed@whitehouse.gov'},
+                "bcc",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"bcc": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "bcc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"bcc": '"Bartlet, Jed" <jed@whitehouse.gov>'},
+                "bcc",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                {"bcc": '"Bartlet, Jed" <jed@whitehouse.gov>, "Zeigler, Toby" <toby@whitehouse.gov'},
+                "bcc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            (
+                {"bcc": 'jed@whitehouse.gov, toby@whitehouse.gov'},
+                "bcc",
+                ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
+            ),
+            # Handling edge-case or invalid content
+            (
+                # comma-separated names should be in double quotes
+                {"to": 'Bartlet, Jed <jed@whitehouse.gov>'},
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                # extreme unicode
+                {"to": u'"McTøst, Sīla" <sīla@exañple.come>'},
+                "to",
+                [u'sīla@exañple.come'],
+            ),
+            (
+                # real-world edge case example
+                {"to": u""""Djapri, Mario" <Mario.Djapri@lr.org>, "Kamakoti, Naveen" <Naveen.Kamakoti@lr.org>, Rudi Sellers <D1855@messages.yunojuno.com>"""},
+                "to",
+                [u'Mario.Djapri@lr.org', 'Naveen.Kamakoti@lr.org', 'D1855@messages.yunojuno.com'],
+            )
+        ]:
+
+            payload = sendgrid_payload.copy()
+            payload.update(payload_changes)
+
+            request = self.factory.post(self.url, data=payload)
+            email = self.parser.parse(request)
+
+            self.assertEqual(
+                getattr(email, attr_name),
+                expected,
+                "Failed to get %s for '%s' %s" % (
+                    expected, attr_name, payload_changes
+                )
+            )
 
     def test_parse_valid_request(self):
         """Test that a valid POST returns a 200."""
