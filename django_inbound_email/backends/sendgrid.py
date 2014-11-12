@@ -52,7 +52,7 @@ def _decode_POST_value(request, field_name, default=None):
 class SendGridRequestParser(RequestParser):
     """SendGrid request parser."""
 
-    def _get_addresses(self, string, retain_name=False):
+    def _get_addresses(self, address_data, retain_name=False):
         """
         Takes RFC-compliant email addresses in both terse (email only)
         and verbose (name + email) forms and returns a list of
@@ -68,7 +68,15 @@ class SendGridRequestParser(RequestParser):
         # We trust than an email address contains an "@" after
         # email.utils.getaddresses has done the hard work. If we wanted
         # to we could use a regex to check for greater email validity
-        output = [x[1] for x in getaddresses(string) if "@" in x[1]]
+
+        # NB: getaddresses expects a list, so ensure we feed it appropriately
+        if type(address_data) in [str, unicode]:
+            if "[" not in address_data:
+                # Definitely turn these into a list
+                # NB: this is pretty assumptive, but still prob OK
+                address_data = [address_data]
+
+        output = [x[1] for x in getaddresses(address_data) if "@" in x[1]]
         return output
 
     def parse(self, request):
@@ -88,7 +96,10 @@ class SendGridRequestParser(RequestParser):
         assert isinstance(request, HttpRequest), "Invalid request type: %s" % type(request)
 
         try:
-            from_email = self._get_addresses([_decode_POST_value(request, 'from')])
+            # from_email should never be a list (unless we change our API)
+            from_email = self._get_addresses([_decode_POST_value(request, 'from')])[0]
+
+            # ...but all these can and will be a list
             to_email = self._get_addresses([_decode_POST_value(request, 'to')])
             cc = self._get_addresses([_decode_POST_value(request, 'cc', default='')])
             bcc = self._get_addresses([_decode_POST_value(request, 'bcc', default='')])
@@ -104,6 +115,11 @@ class SendGridRequestParser(RequestParser):
 
         except MultiValueDictKeyError as ex:
             raise RequestParseError(u"Inbound request is missing required value: %s." % ex)
+
+        if "@" not in from_email:
+            # Light sanity check for potential issues related to taking just the
+            # first element of the 'from' address list
+            raise RequestParseError(u"Could not get a valid from address out of: %s." % request)
 
         email = EmailMultiAlternatives(
             subject=subject,

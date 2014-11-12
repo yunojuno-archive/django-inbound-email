@@ -153,10 +153,10 @@ class SendGridRequestParserTests(TestCase):
             )
         )
         self.assertEqual(
-            email.from_email,
+            email.from_email,  # NB: This should/will not be a list...
             self.parser._get_addresses(
-                [data.get('from', u'')]
-            )
+                data.get('from', u'')
+            )[0],  # ...so we don't want a list from _get_addresses either
         )
         self.assertEqual(email.subject, data.get('subject', u''))
         self.assertEqual(email.body, data.get('text', u''))
@@ -224,15 +224,21 @@ class SendGridRequestParserTests(TestCase):
             ),
 
             # FROM
+            # NB: we do not get back a list
             (
                 {"from": 'jed@whitehouse.gov'},
                 "from_email",
-                ['jed@whitehouse.gov'],
+                'jed@whitehouse.gov',
+            ),
+            (
+                {"from": 'Jed Bartlet <jed@whitehouse.gov>'},
+                "from_email",
+                'jed@whitehouse.gov',
             ),
             (
                 {"from": '"Bartlet, Jed" <jed@whitehouse.gov>'},
                 "from_email",
-                ['jed@whitehouse.gov'],
+                'jed@whitehouse.gov',
             ),
 
             # CC
