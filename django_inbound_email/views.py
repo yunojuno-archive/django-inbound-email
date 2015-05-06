@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, HttpResponse
@@ -45,10 +46,16 @@ def receive_inbound_email(request):
     try:
         # clean up encodings and extract relevant fields from request.POST
         backend = get_backend_instance()
-        email = backend.parse(request)
+        emails = backend.parse(request)
 
-        # fire the signal
-        email_received.send(sender=backend.__class__, email=email, request=request)
+        # backend.parse can return either an EmailMultiAlternatives
+        # or a list of those
+        if emails:
+            if isinstance(emails, EmailMultiAlternatives):
+                emails = [emails]
+            for email in emails:
+                # fire the signal for each email
+                email_received.send(sender=backend.__class__, email=email, request=request)
 
     except AttachmentTooLargeError as ex:
         logger.exception(ex)

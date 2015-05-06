@@ -227,7 +227,7 @@ Features
 Things it will do:
 
 -  Parse HTTP requests into EmailMultiAlternatives objects
--  Pluggable backends (SendGrid and Mailgun currently supported)
+-  Pluggable backends (SendGrid, Mailgun and Mandrill currently supported)
 -  Handle character encodings properly
 -  Handle attachments, including if they are too large
 
