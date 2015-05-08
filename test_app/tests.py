@@ -24,7 +24,9 @@ from test_app.test_files.sendgrid_post import test_inbound_payload as sendgrid_p
 from test_app.test_files.mailgun_post import test_inbound_payload as mailgun_payload
 from test_app.test_files.sendgrid_post_windows_1252 import test_inbound_payload_1252
 from test_app.test_files.mandrill_post import post_data as mandrill_payload
-
+from test_app.test_files.mandrill_post import (
+    post_data_with_attachments as mandrill_payload_with_attachments
+)
 
 # don't read it out of the settings - fix it here so we know what we're using
 DEFAULT_TEST_PARSER = "django_inbound_email.backends.sendgrid.SendGridRequestParser"
@@ -48,9 +50,11 @@ class ViewFunctionTests(TestCase):
         self.url = reverse('receive_inbound_email')
         self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
 
-    def _get_payloads_and_parsers(self):
+    def _get_payloads_and_parsers(self, with_attachments=False):
+        mpwa = mandrill_payload_with_attachments
+        mp = mandrill_payload
         return [
-            (MANDRILL_REQUEST_PARSER, mandrill_payload),
+            (MANDRILL_REQUEST_PARSER, mpwa if with_attachments else mp),
             (SENDGRID_REQUEST_PARSER, sendgrid_payload),
             (MAILGUN_REQUEST_PARSER, mailgun_payload),
         ]
@@ -126,7 +130,7 @@ class ViewFunctionTests(TestCase):
         # set a zero allowed max attachment size
         settings.INBOUND_EMAIL_ATTACHMENT_SIZE_MAX = 0
 
-        for klass, payload in self._get_payloads_and_parsers():
+        for klass, payload in self._get_payloads_and_parsers(with_attachments=True):
             settings.INBOUND_EMAIL_PARSER = klass
             _payload = payload.copy()
 
@@ -518,13 +522,31 @@ class MandrillRequestParserTests(TestCase):
         self.factory = RequestFactory()
         self.parser = MandrillRequestParser()
         self.payload = mandrill_payload
+        self.payload_with_attachments = mandrill_payload_with_attachments
 
     def _assertEmailParsedCorrectly(self, emails, mandrill_payload, has_html=True):
+        def _parse_to(to):
+            ret = []
+            for address, name in to:
+                if not name:
+                    ret.append(address)
+                else:
+                    ret.append("%s <%s>" % (name, address))
+            return ret
+
+        def _parse_from(name, email):
+            if not name:
+                return email
+            return "%s <%s>" % (name, email)
+
         for i, e in enumerate(emails):
             msg = json.loads(mandrill_payload['mandrill_events'])[i]['msg']
             self.assertEqual(e.subject, msg['subject'])
-            self.assertEqual(e.to, msg['to'])
-            self.assertEqual(e.from_email, "%(from_name)s <%(from_email)s>" % msg)
+            self.assertEqual(e.to, _parse_to(msg['to']))
+            self.assertEqual(
+                e.from_email,
+                _parse_from(msg.get('from_name'), msg.get('from_email'))
+            )
             if has_html:
                 self.assertEqual(e.alternatives[0][0], msg['html'])
             for name, contents, mimetype in e.attachments:
@@ -539,6 +561,11 @@ class MandrillRequestParserTests(TestCase):
         request = self.factory.post(self.url, data=mandrill_payload)
         emails = self.parser.parse(request)
         self._assertEmailParsedCorrectly(emails, mandrill_payload)
+
+    def test_parse_valid_request__with_attachments(self):
+        request = self.factory.post(self.url, data=mandrill_payload_with_attachments)
+        emails = self.parser.parse(request)
+        self._assertEmailParsedCorrectly(emails, mandrill_payload_with_attachments)
 
     def _process_dump(self, foo):
         dump = json.loads(self.payload['mandrill_events'])
@@ -566,7 +593,7 @@ class MandrillRequestParserTests(TestCase):
     def test_attachments_max_size(self):
         """Test inbound email attachment max size limit."""
         # receive an email
-        request = self.factory.post(self.url, data=self.payload)
+        request = self.factory.post(self.url, data=self.payload_with_attachments)
         # should except
         with self.assertRaises(AttachmentTooLargeError):
             self.parser.parse(request)
