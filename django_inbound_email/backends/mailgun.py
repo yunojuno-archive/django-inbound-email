@@ -48,10 +48,14 @@ class MailgunRequestParser(RequestParser):
             bcc = request.POST.get('bcc', '').split(',')
 
         except MultiValueDictKeyError as ex:
-            raise RequestParseError(u"Inbound request is missing required value: %s." % ex)
+            raise RequestParseError(
+                u"Inbound request is missing required value: %s." % ex
+            )
 
         except AttributeError as ex:
-            raise RequestParseError(u"Inbound request is missing required value: %s." % ex)
+            raise RequestParseError(
+                u"Inbound request is missing required value: %s." % ex
+            )
 
         email = EmailMultiAlternatives(
             subject=subject,
