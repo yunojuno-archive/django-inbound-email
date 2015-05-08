@@ -4,7 +4,7 @@ import logging
 
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, HttpResponse
+from django.views.decorators.http import require_http_methods, HttpResponse
 
 from django_inbound_email.signals import email_received, email_received_unacceptable
 from django_inbound_email.backends import get_backend_instance
@@ -29,7 +29,7 @@ def _log_request(request):
         logger.debug("- FILES['%s']: '%s', %sB", n, f.content_type, f.size)
 
 
-@require_POST
+@require_http_methods(["HEAD", "POST"])
 @csrf_exempt
 def receive_inbound_email(request):
     """Receives inbound email from SendGrid.
@@ -41,6 +41,10 @@ def receive_inbound_email(request):
     # log the request.POST and request.FILES contents
     if log_requests is True:
         _log_request(request)
+
+    # HEAD requests are used by some backends to validate the route
+    if request.method == 'HEAD':
+        return HttpResponse('OK')
 
     try:
         # clean up encodings and extract relevant fields from request.POST

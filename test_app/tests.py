@@ -55,6 +55,12 @@ class ViewFunctionTests(TestCase):
         request = self.factory.post(self.url, data=sendgrid_payload)
         _log_request(request)
 
+    def test_inbound_request_HEAD_200(self):
+        """Return 200 OK to a HEAD request."""
+        request = self.factory.head(self.url)
+        response = receive_inbound_email(request)
+        self.assertEqual(response.status_code, 200)
+
     def test_valid_request(self):
         """Test the RequestParseErrors are handled correctly, and return HTTP 200."""
         request = self.factory.post(self.url, data=sendgrid_payload)
