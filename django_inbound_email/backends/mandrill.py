@@ -38,6 +38,23 @@ class MandrillRequestParser(RequestParser):
                 email.attach(name, content, mimetype)
         return email
 
+    def _get_recipients(self, array):
+        """Returns an iterator of objects
+           in the form ["Name <address@example.com", ...]
+           from the array [["address@example.com", "Name"]]
+        """
+        for address, name in array:
+            if name is None:
+                yield address
+            else:
+                yield "%s <%s>" % (name, address)
+
+    def _get_sender(self, from_email, from_name=None):
+        if not from_name:
+            return from_email
+        else:
+            return "%s <%s>" % (from_name, from_email)
+
     def parse(self, request):
         """Parse incoming request and return an email instance.
 
@@ -67,9 +84,8 @@ class MandrillRequestParser(RequestParser):
             msg = message.get('msg')
             try:
                 from_email = msg['from_email']
-                from_name = msg['from_name']
+                to = list(self._get_recipients(msg['to']))
 
-                to = msg['to']
                 subject = msg['subject']
 
                 attachments = msg.get('attachments', {})
@@ -77,16 +93,19 @@ class MandrillRequestParser(RequestParser):
 
                 text = msg['text']
                 html = msg.get('html')
-            except KeyError as ex:
+            except (KeyError, ValueError) as ex:
                 raise RequestParseError(
-                    u"Inbound request is missing required value: %s." % ex
+                    u"Inbound request is missing or got an invalid value.: %s." % ex
                 )
 
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=text,
-                from_email="%s <%s>" % (from_name, from_email),
-                to=to
+                from_email=self._get_sender(
+                    from_email=from_email,
+                    from_name=msg.get('from_name'),
+                ),
+                to=to,
             )
             if html is not None and len(html) > 0:
                 email.attach_alternative(html, "text/html")
