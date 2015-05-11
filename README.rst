@@ -8,7 +8,8 @@ An inbound email handler for Django.
 .. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
     :target: https://travis-ci.org/yunojuno/django-inbound-email
 
-We have a working implementation, with SendGrid and Mailgun backends.
+We have a working implementation, with SendGrid, Mailgun and Mandrill backends.
+(Both SendGrid and Mandrill have been used in production environments.)
 
 The test_app is deployed to Heroku and any emails sent to
 anything@django-inbound-email.yunojuno.com will be parsed by a live version of
