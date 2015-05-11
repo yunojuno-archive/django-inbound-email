@@ -4,6 +4,8 @@ import logging
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django_inbound_email.backends import RequestParser
+from django.utils.encoding import smart_bytes
+
 
 from django_inbound_email.errors import (
     RequestParseError,
@@ -20,7 +22,8 @@ class MandrillRequestParser(RequestParser):
         for key, attachment in attachments.iteritems():
             name = attachment.get('name')
             mimetype = attachment.get('type')
-            content = attachment.get('content')
+            content = attachment.get('content', u"")
+            content = smart_bytes(content, strings_only=True)
 
             if len(content) > self.max_file_size:
                 logger.debug(

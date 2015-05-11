@@ -147,5 +147,4 @@ class SendGridRequestParser(RequestParser):
                 )
             else:
                 email.attach(f.name, f.read(), f.content_type)
-
         return email
