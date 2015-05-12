@@ -28,6 +28,12 @@ from test_app.test_files.mandrill_post import post_data as mandrill_payload
 from test_app.test_files.mandrill_post import (
     post_data_with_attachments as mandrill_payload_with_attachments
 )
+from test_app.test_files.mandrill_post import (
+    post_data_with_attachments_mailbox as mandrill_payload_with_attachments_mailbox
+)
+from test_app.test_files.mandrill_post import (
+    post_data_with_attachments_mailbox_2 as mandrill_payload_with_attachments_mailbox_2
+)
 
 # don't read it out of the settings - fix it here so we know what we're using
 DEFAULT_TEST_PARSER = "django_inbound_email.backends.sendgrid.SendGridRequestParser"
@@ -561,6 +567,44 @@ class MandrillRequestParserTests(TestCase):
                 self.assertEqual(msg['attachments'][name]['type'], mimetype)
             self.assertEqual(e.body, msg['text'])
 
+    def test_parse_valid_request__with_attachments__from_mailbox(self):
+        "Test email sent via Mailbox app without body text "
+        request = self.factory.post(self.url, data=mandrill_payload_with_attachments_mailbox)
+        emails = self.parser.parse(request)
+        email = emails[0]
+        payload = json.loads(mandrill_payload_with_attachments_mailbox['mandrill_events'])
+
+        self.assertEqual(len(email.attachments), 1)
+        self.assertEqual(email.attachments[0][0], '3c8e4ffb-6366-4351-813f-d0f600ed720e')
+        self.assertEqual(email.attachments[0][2], 'image/jpeg')
+        self.assertEqual(
+            email.attachments[0][1],
+            # the content is base64-decoded, even if the base64 flag is off in the request
+            base64.b64decode(
+                payload[0]['msg']['images']
+                ['3c8e4ffb-6366-4351-813f-d0f600ed720e']['content']
+            )
+        )
+
+    def test_parse_valid_request__with_attachments__from_mailbox__2(self):
+        "Test email sent via Mailbox app with text "
+        request = self.factory.post(self.url, data=mandrill_payload_with_attachments_mailbox_2)
+        emails = self.parser.parse(request)
+        email = emails[0]
+        payload = json.loads(mandrill_payload_with_attachments_mailbox_2['mandrill_events'])
+
+        self.assertEqual(len(email.attachments), 1)
+        self.assertEqual(email.attachments[0][0], '7e357447-3f2e-4c12-a643-5720f30ca7af')
+        self.assertEqual(email.attachments[0][2], 'image/jpeg')
+        self.assertEqual(
+            email.attachments[0][1],
+            # the content is base64-decoded, even if the base64 flag is off in the request
+            base64.b64decode(
+                payload[0]['msg']['images']
+                ['7e357447-3f2e-4c12-a643-5720f30ca7af']['content']
+            )
+        )
+
     def test_parse_valid_request(self):
         """
         Test a valid POST returns 200 and email(s) are correctly parsed
@@ -581,7 +625,7 @@ class MandrillRequestParserTests(TestCase):
 
     def test_parse_invalid_request(self):
         """Test that an invalid request raises RequestParseError."""
-        _process = lambda dump: dump[0]['msg'].pop('text', None)
+        _process = lambda dump: dump[0]['msg'].pop('from_email', None)
 
         payload = {'mandrill_events': self._process_dump(_process)}
         request = self.factory.post(self.url, data=payload)

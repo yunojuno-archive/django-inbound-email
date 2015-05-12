@@ -1,3 +1,6 @@
+#encoding=utf-8
+
+import re
 import json
 import logging
 import base64
@@ -16,6 +19,12 @@ from django_inbound_email.errors import (
 logger = logging.getLogger(__name__)
 
 
+def _detect_base64(s):
+    """Quite an ingenuous function to guess if a string is base64 encoded
+    """
+    return (len(s) % 4 == 0) and re.match('^[A-Za-z0-9+/]+[=]{0,2}$', s)
+
+
 class MandrillRequestParser(RequestParser):
     """Mandrill request parser. """
 
@@ -25,8 +34,13 @@ class MandrillRequestParser(RequestParser):
             name = attachment.get('name')
             mimetype = attachment.get('type')
             content = attachment.get('content', u"")
+
             if is_base64:
                 content = base64.b64decode(content)
+            # watchout: sometimes attachment contents are base64'd but mandrill doesn't set the flag
+            elif _detect_base64(content):
+                content = base64.b64decode(content)
+
             content = smart_bytes(content, strings_only=True)
 
             if len(content) > self.max_file_size:
@@ -93,13 +107,13 @@ class MandrillRequestParser(RequestParser):
                 from_email = msg['from_email']
                 to = list(self._get_recipients(msg['to']))
 
-                subject = msg['subject']
+                subject = msg.get('subject', "")
 
                 attachments = msg.get('attachments', {})
                 attachments.update(msg.get('images', {}))
 
-                text = msg['text']
-                html = msg.get('html')
+                text = msg.get('text', "")
+                html = msg.get('html', "")
             except (KeyError, ValueError) as ex:
                 raise RequestParseError(
                     u"Inbound request is missing or got an invalid value.: %s." % ex
