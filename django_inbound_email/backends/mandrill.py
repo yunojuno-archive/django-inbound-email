@@ -1,5 +1,6 @@
 import json
 import logging
+import base64
 
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
@@ -20,9 +21,12 @@ class MandrillRequestParser(RequestParser):
 
     def _process_attachments(self, email, attachments):
         for key, attachment in attachments.iteritems():
+            is_base64 = attachment.get('base64')
             name = attachment.get('name')
             mimetype = attachment.get('type')
             content = attachment.get('content', u"")
+            if is_base64:
+                content = base64.b64decode(content)
             content = smart_bytes(content, strings_only=True)
 
             if len(content) > self.max_file_size:

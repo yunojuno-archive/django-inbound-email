@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from os import path
 import json
+import base64
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -550,7 +551,13 @@ class MandrillRequestParserTests(TestCase):
             if has_html:
                 self.assertEqual(e.alternatives[0][0], msg['html'])
             for name, contents, mimetype in e.attachments:
-                self.assertEqual(msg['attachments'][name]['content'], contents)
+                # Check that base64 contents are decoded
+                is_base64 = msg['attachments'][name].get('base64')
+                req_contents = msg['attachments'][name]['content']
+                if is_base64:
+                    req_contents = base64.b64decode(req_contents)
+
+                self.assertEqual(req_contents, contents)
                 self.assertEqual(msg['attachments'][name]['type'], mimetype)
             self.assertEqual(e.body, msg['text'])
 
