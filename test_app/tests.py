@@ -322,7 +322,7 @@ class SendGridRequestParserTests(TestCase):
                 ['jed@whitehouse.gov'],
             ),
             (
-                {"bcc": '"Bartlet, Jed" <jed@whitehouse.gov>, "Zeigler, Toby" <toby@whitehouse.gov'},
+                {"bcc": '"Bartlet, Jed" <jed@whitehouse.gov>, "Zeigler, Toby" <toby@whitehouse.gov'},  # noqa
                 "bcc",
                 ['jed@whitehouse.gov', 'toby@whitehouse.gov'],
             ),
@@ -339,16 +339,16 @@ class SendGridRequestParserTests(TestCase):
                 ['jed@whitehouse.gov'],
             ),
             (
-                # extreme unicode
-                {"to": u'"McTøst, Sīla" <sīla@exañple.come>'},
+                # Latin 1 example
+                {"to": u'"McTøst, Sīla" <sīla@exañple.com>'},
                 "to",
-                [u'sīla@exañple.come'],
+                [u'sīla@exañple.com'],
             ),
             (
                 # real-world edge case example
-                {"to": u""""Djapri, Mario" <Mario.Djapri@lr.org>, "Kamakoti, Naveen" <Naveen.Kamakoti@lr.org>, Rudi Sellers <D1855@messages.yunojuno.com>"""},
+                {"to": u""""Polo, Marco" <Marco.Polo@example.com>, "Koti, Shareen" <Shareen.Koti@example.com>, Rudi Cant-Fail <X18@messages.yunojuno.com>"""},  # noqa
                 "to",
-                [u'Mario.Djapri@lr.org', 'Naveen.Kamakoti@lr.org', 'D1855@messages.yunojuno.com'],
+                [u'Marco.Polo@example.com', 'Shareen.Koti@example.com', 'X18@messages.yunojuno.com'],  # noqa
             )
         ]:
 
@@ -538,13 +538,13 @@ class MandrillRequestParserTests(TestCase):
                 if not name:
                     ret.append(address)
                 else:
-                    ret.append("%s <%s>" % (name, address))
+                    ret.append("\"%s\" <%s>" % (name, address))
             return ret
 
         def _parse_from(name, email):
             if not name:
                 return email
-            return "%s <%s>" % (name, email)
+            return "\"%s\" <%s>" % (name, email)
 
         for i, e in enumerate(emails):
             msg = json.loads(mandrill_payload['mandrill_events'])[i]['msg']
@@ -648,3 +648,120 @@ class MandrillRequestParserTests(TestCase):
         # should except
         with self.assertRaises(AttachmentTooLargeError):
             self.parser.parse(request)
+
+    def test_correspondent_field_parsing(self):
+        """Test the speific address parsing of the Mandrill backend"""
+        # Addresses https://github.com/yunojuno/django-inbound-email/issues/20
+
+        for input_data, attr_name, expected in [
+            # TO / CC / BCC -- all handled by the same method: _get_recipients()
+            (
+                [['jed@whitehouse.gov', "Jed Bartlet"]],
+                "to",
+                ['"Jed Bartlet" <jed@whitehouse.gov>'],
+            ),
+            (
+                [
+                    ['jed@whitehouse.gov', "Jed Bartlet"],
+                    ['toby@whitehouse.gov', "Toby Ziegler"]],
+                "to",
+                [
+                    '"Jed Bartlet" <jed@whitehouse.gov>',
+                    '"Toby Ziegler" <toby@whitehouse.gov>'
+                ],
+            ),
+            (
+                [['jed@whitehouse.gov', "Bartlet, Jed"]],
+                "to",
+                ['"Bartlet, Jed" <jed@whitehouse.gov>'],
+            ),
+            (
+                [
+                    ['jed@whitehouse.gov', "Bartlet, Jed"],
+                    ['toby@whitehouse.gov', "Ziegler, Toby"]],
+                "to",
+                [
+                    '"Bartlet, Jed" <jed@whitehouse.gov>',
+                    '"Ziegler, Toby" <toby@whitehouse.gov>'
+                ],
+            ),
+            (
+                [['jed@whitehouse.gov', None]],
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                [
+                    ['jed@whitehouse.gov', None],
+                    ['toby@whitehouse.gov', None]],
+                "to",
+                [
+                    'jed@whitehouse.gov',
+                    'toby@whitehouse.gov'
+                ],
+            ),
+            (
+                [['jed@whitehouse.gov', '']],
+                "to",
+                ['jed@whitehouse.gov'],
+            ),
+            (
+                [
+                    ['jed@whitehouse.gov', ''],
+                    ['toby@whitehouse.gov', '']
+                ],
+                "to",
+                [
+                    'jed@whitehouse.gov',
+                    'toby@whitehouse.gov'
+                ],
+            ),
+
+            # FROM - handled by a _get_sender() method
+            # NB: 1) we do not get back a list.
+            # 2) _get_sender expects email and name as args
+            (
+                ['jed@whitehouse.gov', "Jed Bartlet"],
+                "from_email",
+                '"Jed Bartlet" <jed@whitehouse.gov>',
+            ),
+            (
+                ['jed@whitehouse.gov', "Bartlet, Jed"],
+                "from_email",
+                '"Bartlet, Jed" <jed@whitehouse.gov>',
+            ),
+            (
+                ['jed@whitehouse.gov', ""],
+                "from_email",
+                'jed@whitehouse.gov',
+            ),
+            (
+                ['jed@whitehouse.gov', None],
+                "from_email",
+                'jed@whitehouse.gov',
+            ),
+
+            # Handling edge-case or invalid content
+            (
+                # Latin 1 example
+                [[u'sīla@exañple.com', u"McTøst, Sīla"]],
+                "to",
+                [u'"McTøst, Sīla" <sīla@exañple.com>'],
+            ),
+        ]:
+
+            if attr_name == 'from_email':
+                # _get_sender expects a two-tuple of args and returns a string
+                output = self.parser._get_sender(*input_data)
+            else:
+                # _get_recipients expects a list of lists and returns a list of strings
+                _results = self.parser._get_recipients(input_data)
+                output = [x for x in _results]
+
+            self.assertEqual(
+                output,
+                expected,
+                "Failed to get %s for '%s' %s -- got %s" % (
+                    expected, attr_name, input_data, output
+                )
+            )
