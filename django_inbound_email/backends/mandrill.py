@@ -1,4 +1,4 @@
-#encoding=utf-8
+# encoding=utf-8
 
 import re
 import json
@@ -65,16 +65,16 @@ class MandrillRequestParser(RequestParser):
            from the array [["address@example.com", "Name"]]
         """
         for address, name in array:
-            if name is None:
+            if not name:
                 yield address
             else:
-                yield "%s <%s>" % (name, address)
+                yield "\"%s\" <%s>" % (name, address)
 
     def _get_sender(self, from_email, from_name=None):
         if not from_name:
             return from_email
         else:
-            return "%s <%s>" % (from_name, from_email)
+            return "\"%s\" <%s>" % (from_name, from_email)
 
     def parse(self, request):
         """Parse incoming request and return an email instance.
