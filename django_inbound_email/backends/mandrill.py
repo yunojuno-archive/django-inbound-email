@@ -4,6 +4,7 @@ import re
 import json
 import logging
 import base64
+from django.utils import six
 
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
@@ -29,7 +30,7 @@ class MandrillRequestParser(RequestParser):
     """Mandrill request parser. """
 
     def _process_attachments(self, email, attachments):
-        for key, attachment in attachments.iteritems():
+        for key, attachment in six.iteritems(attachments):
             is_base64 = attachment.get('base64')
             name = attachment.get('name')
             mimetype = attachment.get('type')

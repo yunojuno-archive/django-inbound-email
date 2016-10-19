@@ -2,6 +2,7 @@
 # Mailgun specific request parser. See http://www.mailgun.com/inbound-routing
 import logging
 
+from django.utils import six
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
@@ -43,9 +44,18 @@ class MailgunRequestParser(RequestParser):
             )
             html = request.POST.get('stripped-html')
             from_email = request.POST.get('sender')
-            to_email = request.POST.get('recipient').split(',')
-            cc = request.POST.get('cc', '').split(',')
-            bcc = request.POST.get('bcc', '').split(',')
+            to_email = request.POST.get('recipient')
+            if not to_email:
+                raise AttributeError("recipient")
+            to_email = to_email.split(',')
+            cc = request.POST.get('cc', '')
+            if cc:
+                cc = cc.split(',')
+            bcc = request.POST.get('bcc', '')
+            if bcc:
+                bcc = bcc.split(',')
+
+            date = request.POST.get('date') or request.POST.get('Date', '')
 
         except MultiValueDictKeyError as ex:
             raise RequestParseError(
@@ -65,11 +75,13 @@ class MailgunRequestParser(RequestParser):
             cc=cc,
             bcc=bcc,
         )
+        if date:
+            email.extra_headers['date'] = date
         if html is not None and len(html) > 0:
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.iteritems():
+        for n, f in six.iteritems(request.FILES):
             if f.size > self.max_file_size:
                 logger.debug(
                     u"File attachment %s is too large to process (%sB)",

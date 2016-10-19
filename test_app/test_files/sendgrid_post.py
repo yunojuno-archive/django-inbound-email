@@ -62,10 +62,11 @@ test_inbound_payload['attachments'] = '1'
 # DEBUG FILES['attachment1']: 'image/png', 318952B
 
 import json
+from django.utils import six
 
 
 def main():
-    print test_inbound_payload['html']
+    six.print_(test_inbound_payload['html'])
 
 if __name__ == '__main__':
     main()
