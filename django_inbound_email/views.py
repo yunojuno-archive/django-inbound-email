@@ -1,6 +1,7 @@
 # View functions for django-inbound-email
 # -*- coding: utf-8 -*-
 import logging
+from django.utils import six
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -24,10 +25,10 @@ def _log_request(request):
     """Helper function to dump out debug info."""
     logger.debug("Inbound email received")
 
-    for k, v in request.POST.items():
+    for k, v in six.iteritems(request.POST):
         logger.debug("- POST['%s']='%s'" % (k, v))
 
-    for n, f in request.FILES.items():
+    for n, f in six.iteritems(request.FILES):
         logger.debug("- FILES['%s']: '%s', %sB", n, f.content_type, f.size)
 
 

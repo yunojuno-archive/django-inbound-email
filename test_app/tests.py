@@ -433,6 +433,12 @@ class SendGridRequestParserTests(TestCase):
 class MailgunRequestParserTests(TestCase):
     """Tests for MailRequestParser - NB test use parser direct, not via view."""
 
+    def _clean_list(self, l):
+        """
+        Helper that removes empty elements from a list
+        """
+        return [item for item in l if item]
+
     def _assertEmailParsedCorrectly(self, email, data):
         """Helper assert method that matches email properties to posted data.
 
@@ -452,8 +458,14 @@ class MailgunRequestParserTests(TestCase):
             data.get('stripped-text', u''),
             data.get('stripped-signature', u'')
         ))
-        self.assertEqual(email.cc, data.get('cc', u'').split(','))
-        self.assertEqual(email.bcc, data.get('bcc', u'').split(','))
+        self.assertEqual(self._clean_list(email.cc),
+                         self._clean_list(data.get('cc', u'').split(',')))
+        self.assertEqual(self._clean_list(email.bcc),
+                         self._clean_list(data.get('bcc', u'').split(',')))
+
+        if 'Date' in email.extra_headers:
+            self.assertEqual(email.extra_headers['Date'], data.get('date'))
+
         if 'html' in data:
             self.assertEqual(len(email.alternatives), 1)
             self.assertEqual(email.alternatives[0][0], data.get('stripped-html', u''))

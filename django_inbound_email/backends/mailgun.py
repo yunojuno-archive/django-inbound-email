@@ -2,6 +2,7 @@
 # Mailgun specific request parser. See http://www.mailgun.com/inbound-routing
 import logging
 
+from django.utils import six
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
@@ -80,7 +81,7 @@ class MailgunRequestParser(RequestParser):
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.items():
+        for n, f in six.iteritems(request.FILES):
             if f.size > self.max_file_size:
                 logger.debug(
                     u"File attachment %s is too large to process (%sB)",
