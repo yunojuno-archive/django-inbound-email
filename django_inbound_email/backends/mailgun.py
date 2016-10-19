@@ -53,9 +53,8 @@ class MailgunRequestParser(RequestParser):
             bcc = request.POST.get('bcc', '')
             if bcc:
                 bcc = bcc.split(',')
-            date = request.POST.get('date', '')
-            if not date:
-                date = request.POST.get('Date', '')
+
+            date = request.POST.get('date') or request.POST.get('Date', '')
 
         except MultiValueDictKeyError as ex:
             raise RequestParseError(
