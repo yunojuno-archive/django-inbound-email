@@ -45,8 +45,9 @@ class MailgunRequestParser(RequestParser):
             html = request.POST.get('stripped-html')
             from_email = request.POST.get('sender')
             to_email = request.POST.get('recipient')
-            if to_email:
-                to_email = to_email.split(',')
+            if not to_email:
+                raise AttributeError("recipient")
+            to_email = to_email.split(',')
             cc = request.POST.get('cc', '')
             if cc:
                 cc = cc.split(',')
