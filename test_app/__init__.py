@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 
-from django_inbound_email.signals import email_received
+from inbound_email.signals import email_received
 
 logger = logging.getLogger(__name__)
 

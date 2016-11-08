@@ -1,10 +1,5 @@
-"""Main project URL definitions."""
-from django.conf.urls import patterns, include, url
+from django.conf.urls import url, include
 
-urlpatterns = patterns(
-    '',
-    url(
-        r'^emails/',
-        include('django_inbound_email.urls')
-    )
-)
+urlpatterns = [
+    url(r'^emails/', include('inbound_email.urls', namespace='inbound'))
+]

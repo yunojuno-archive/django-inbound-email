@@ -1,35 +1,24 @@
-"""
-Setup file for django-inbound-email.
-"""
-import os
-from setuptools import setup
+from os import path, pardir, chdir
+from setuptools import setup, find_packages
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+README = open(path.join(path.dirname(__file__), 'README.rst')).read()
+# requirements.txt must be included in MANIFEST.in and include_package_data must be True
+# in order for this to work; ensures that tox can use the setup to enforce requirements
+REQUIREMENTS = '\n'.join(open(path.join(path.dirname(__file__), 'requirements.txt')).readlines())
 
 # allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-
-# we can't import django_inbound_email as it hasn't been installed yet, so instead
-# read information in as text. This will read in the __init__ file, and
-# create a dict containing any lines beginning with '__' as keys, with
-# whatever is after the '=' as the value,
-# __desc__ = 'hello'
-# would give {'desc': 'hello'}
-meta = {}
-for l in [line for line in tuple(open('django_inbound_email/__init__.py', 'r')) if line[:2] == '__']:
-    t = l.split('=')
-    meta[t[0].strip().strip('__')] = t[1].strip().strip('\'')
+chdir(path.normpath(path.join(path.abspath(__file__), pardir)))
 
 setup(
-    name=meta['title'],
-    version=meta['version'],
-    packages=['django_inbound_email', 'django_inbound_email.backends'],
-    install_requires=['django>=1.6'],
+    name='django-inbound-email',
+    version='0.9.0',
+    packages=find_packages(),
+    install_requires=REQUIREMENTS,
     include_package_data=True,
-    description=meta['description'],
+    description='A Django app for receiving inbound emails.',
     long_description=README,
     url='https://github.com/yunojuno/django-inbound-email',
-    author=meta['author'],
+    author='YunoJuno',
     author_email='hugo@yunojuno.com',
     classifiers=[
         'Environment :: Web Environment',

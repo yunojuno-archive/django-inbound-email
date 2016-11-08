@@ -1,5 +1,4 @@
 # encoding=utf-8
-
 import re
 import json
 import logging
@@ -7,14 +6,10 @@ import base64
 
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
-from django_inbound_email.backends import RequestParser
 from django.utils.encoding import smart_bytes
 
-
-from django_inbound_email.errors import (
-    RequestParseError,
-    AttachmentTooLargeError,
-)
+from ..backends import RequestParser
+from ..errors import RequestParseError, AttachmentTooLargeError
 
 logger = logging.getLogger(__name__)
 

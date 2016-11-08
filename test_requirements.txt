@@ -1,3 +1,0 @@
-# test tools (could be split out for off-site testing)
--r requirements.txt
-tox

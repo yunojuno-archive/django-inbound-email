@@ -1,12 +1,19 @@
-django-inbound
-==============
+.. image:: https://badge.fury.io/py/django-inbound-email.svg
+    :target: https://badge.fury.io/py/django-inbound-email
+
+.. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
+    :target: https://travis-ci.org/yunojuno/django-inbound-email
+
+.. image:: https://codecov.io/gh/yunojuno/django-inbound-email/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/yunojuno/django-inbound-email
+
+
+Django Inbound Email
+====================
 
 An inbound email handler for Django.
 
 **Current Status**
-
-.. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
-    :target: https://travis-ci.org/yunojuno/django-inbound-email
 
 We have a working implementation, with SendGrid, Mailgun and Mandrill backends.
 (Both SendGrid and Mandrill have been used in production environments.)
@@ -128,7 +135,7 @@ the ``email_received`` signal:
     # This snippet goes somewhere inside your project,
     # wherever you need to react to incoming emails.
     import logging
-    from django_inbound_email.signals import email_received
+    from inbound_email.signals import email_received
 
     def on_email_received(sender, **kwargs):
         """Handle inbound emails."""
@@ -161,7 +168,7 @@ something that Django can deal with.
     from django.core.files.uploadedfile import SimpleUploadedFile
     from django.db import models
 
-    from django_inbound_email.signals import email_received
+    from inbound_email.signals import email_received
 
 
     def get_file(attachment):
@@ -206,7 +213,7 @@ Configuration
 .. code:: python
 
     # the fully-qualified path to the provider's backend parser
-    INBOUND_EMAIL_PARSER = 'django_inbound_email.backends.sendgrid.SendGridRequestParser'
+    INBOUND_EMAIL_PARSER = 'inbound_email.backends.sendgrid.SendGridRequestParser'
 
     # if True (default=False) then log the contents of each inbound request
     INBOUND_EMAIL_LOG_REQUESTS = True
@@ -218,7 +225,7 @@ Configuration
     INSTALLED_APPS = (
         # other apps
         # ...
-        'django_inbound_email',
+        'inbound_email',
     )
 
 

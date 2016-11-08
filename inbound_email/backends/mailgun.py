@@ -6,11 +6,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
 
-from django_inbound_email.backends import RequestParser
-from django_inbound_email.errors import (
-    RequestParseError,
-    AttachmentTooLargeError,
-)
+from ..backends import RequestParser
+from ..errors import RequestParseError, AttachmentTooLargeError
 
 logger = logging.getLogger(__name__)
 

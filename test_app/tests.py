@@ -11,15 +11,15 @@ from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from django.utils.encoding import smart_text
 
-from django_inbound_email.errors import (
+from inbound_email.errors import (
     RequestParseError,
     AttachmentTooLargeError
 )
-from django_inbound_email.backends.sendgrid import SendGridRequestParser
-from django_inbound_email.backends.mailgun import MailgunRequestParser
-from django_inbound_email.backends.mandrill import MandrillRequestParser
-from django_inbound_email.signals import email_received, email_received_unacceptable
-from django_inbound_email.views import receive_inbound_email, _log_request
+from inbound_email.backends.sendgrid import SendGridRequestParser
+from inbound_email.backends.mailgun import MailgunRequestParser
+from inbound_email.backends.mandrill import MandrillRequestParser
+from inbound_email.signals import email_received, email_received_unacceptable
+from inbound_email.views import receive_inbound_email, _log_request
 
 from test_app.test_files.sendgrid_post import test_inbound_payload as sendgrid_payload
 from test_app.test_files.mailgun_post import test_inbound_payload as mailgun_payload
@@ -36,10 +36,10 @@ from test_app.test_files.mandrill_post import (
 )
 
 # don't read it out of the settings - fix it here so we know what we're using
-DEFAULT_TEST_PARSER = "django_inbound_email.backends.sendgrid.SendGridRequestParser"
-MANDRILL_REQUEST_PARSER = "django_inbound_email.backends.mandrill.MandrillRequestParser"
-SENDGRID_REQUEST_PARSER = "django_inbound_email.backends.sendgrid.SendGridRequestParser"
-MAILGUN_REQUEST_PARSER = "django_inbound_email.backends.mailgun.MailgunRequestParser"
+DEFAULT_TEST_PARSER = "inbound_email.backends.sendgrid.SendGridRequestParser"
+MANDRILL_REQUEST_PARSER = "inbound_email.backends.mandrill.MandrillRequestParser"
+SENDGRID_REQUEST_PARSER = "inbound_email.backends.sendgrid.SendGridRequestParser"
+MAILGUN_REQUEST_PARSER = "inbound_email.backends.mailgun.MailgunRequestParser"
 
 
 class ViewFunctionTests(TestCase):
@@ -54,7 +54,7 @@ class ViewFunctionTests(TestCase):
     def setUp(self):
         # Every test needs access to the request factory.
         self.factory = RequestFactory()
-        self.url = reverse('receive_inbound_email')
+        self.url = reverse('inbound:receive_inbound_email')
         self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
 
     def _get_payloads_and_parsers(self, with_attachments=False):
@@ -215,7 +215,7 @@ class SendGridRequestParserTests(TestCase):
 
     def setUp(self):
         # Every test needs access to the request factory.
-        self.url = reverse('receive_inbound_email')
+        self.url = reverse('inbound:receive_inbound_email')
         self.factory = RequestFactory()
         self.parser = SendGridRequestParser()
         self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
@@ -460,7 +460,7 @@ class MailgunRequestParserTests(TestCase):
 
     def setUp(self):
         # Every test needs access to the request factory.
-        self.url = reverse('receive_inbound_email')
+        self.url = reverse('inbound:receive_inbound_email')
         self.factory = RequestFactory()
         self.parser = MailgunRequestParser()
         self.test_upload_txt = path.join(path.dirname(__file__), 'test_files/test_upload_file.txt')
@@ -525,7 +525,7 @@ class MailgunRequestParserTests(TestCase):
 
 class MandrillRequestParserTests(TestCase):
     def setUp(self):
-        self.url = reverse('receive_inbound_email')
+        self.url = reverse('inbound:receive_inbound_email')
         self.factory = RequestFactory()
         self.parser = MandrillRequestParser()
         self.payload = mandrill_payload

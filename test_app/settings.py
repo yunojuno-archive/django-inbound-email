@@ -30,7 +30,7 @@ point out that this is in no way sufficient to run a production application. You
 run this app at your own risk.
 
 """
-from os import environ
+from os import environ, getenv
 
 # if we have an email server setup, then the test app will listen for incoming
 # emails, and send them back to the sender. This requires a set of valid SMTP
@@ -48,10 +48,13 @@ except KeyError as e:
     BOUNCEBACK_ENABLED = False
 
 # set the django DEBUG option
-DEBUG = environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
+DEBUG = getenv('DJANGO_DEBUG', 'true').lower() == 'true'
 
 # the HTTP request parser to use - we set a default as the tests need a valid parser.
-INBOUND_EMAIL_PARSER = environ.get('INBOUND_EMAIL_PARSER', 'django_inbound_email.backends.sendgrid.SendGridRequestParser')
+INBOUND_EMAIL_PARSER = environ.get(
+    'INBOUND_EMAIL_PARSER',
+    'django_inbound_email.backends.sendgrid.SendGridRequestParser'
+)
 
 # whether to dump out a log of all incoming email requests
 INBOUND_EMAIL_LOG_REQUESTS = environ.get('INBOUND_EMAIL_LOG_REQUESTS', 'false').lower() == 'true'
@@ -65,12 +68,12 @@ ROOT_URLCONF = 'test_app.urls'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'delme'
+        'NAME': ':memory:'
     }
 }
 
 INSTALLED_APPS = (
-    'django_inbound_email',
+    'inbound_email',
     'test_app',
 )
 
@@ -78,6 +81,13 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = []
 
 SECRET_KEY = "something really, really hard to guess goes here."
+
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+LANGUAGE_CODE = getenv('DEFAULT_LANGUAGE_CODE', 'en-gb')
 
 LOGGING = {
     'version': 1,
@@ -98,7 +108,7 @@ LOGGING = {
         '': {
             'handlers': ['console'],
             'propagate': True,
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }
