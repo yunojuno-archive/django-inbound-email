@@ -11,11 +11,12 @@ chdir(path.normpath(path.join(path.abspath(__file__), pardir)))
 
 setup(
     name='django-inbound-email',
-    version='0.9.0',
+    version='0.9.1-dev',
     packages=find_packages(),
     install_requires=REQUIREMENTS,
     include_package_data=True,
     description='A Django app for receiving inbound emails.',
+    license='MIT',
     long_description=README,
     url='https://github.com/yunojuno/django-inbound-email',
     author='YunoJuno',
