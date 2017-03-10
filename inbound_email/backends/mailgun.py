@@ -66,7 +66,7 @@ class MailgunRequestParser(RequestParser):
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.iteritems():
+        for n, f in request.FILES.items():
             if f.size > self.max_file_size:
                 logger.debug(
                     u"File attachment %s is too large to process (%sB)",

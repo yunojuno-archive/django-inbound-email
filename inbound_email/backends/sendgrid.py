@@ -15,6 +15,12 @@ from ..errors import RequestParseError, AttachmentTooLargeError
 logger = logging.getLogger(__name__)
 
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
+
 def _decode_POST_value(request, field_name, default=None):
     """Helper to decode a request field into unicode based on charsets encoding.
 
@@ -67,7 +73,7 @@ class SendGridRequestParser(RequestParser):
         # to we could use a regex to check for greater email validity
 
         # NB: getaddresses expects a list, so ensure we feed it appropriately
-        if type(address_data) in [str, unicode]:
+        if isinstance(address_data, basestring):
             if "[" not in address_data:
                 # Definitely turn these into a list
                 # NB: this is pretty assumptive, but still prob OK
@@ -130,7 +136,7 @@ class SendGridRequestParser(RequestParser):
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.iteritems():
+        for n, f in request.FILES.items():
             if f.size > self.max_file_size:
                 logger.debug(
                     u"File attachment %s is too large to process (%sB)",

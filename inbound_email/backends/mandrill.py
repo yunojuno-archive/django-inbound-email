@@ -24,7 +24,7 @@ class MandrillRequestParser(RequestParser):
     """Mandrill request parser. """
 
     def _process_attachments(self, email, attachments):
-        for key, attachment in attachments.iteritems():
+        for key, attachment in attachments.items():
             is_base64 = attachment.get('base64')
             name = attachment.get('name')
             mimetype = attachment.get('type')
