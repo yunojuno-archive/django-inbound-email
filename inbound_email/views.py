@@ -21,10 +21,10 @@ def _log_request(request):
     """Helper function to dump out debug info."""
     logger.debug("Inbound email received")
 
-    for k, v in request.POST.iteritems():
+    for k, v in request.POST.items():
         logger.debug("- POST['%s']='%s'" % (k, v))
 
-    for n, f in request.FILES.iteritems():
+    for n, f in request.FILES.items():
         logger.debug("- FILES['%s']: '%s', %sB", n, f.content_type, f.size)
 
 

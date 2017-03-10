@@ -65,7 +65,7 @@ import json
 
 
 def main():
-    print test_inbound_payload['html']
+    print(test_inbound_payload['html'])
 
 if __name__ == '__main__':
     main()
