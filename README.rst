@@ -4,14 +4,18 @@
 .. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
     :target: https://travis-ci.org/yunojuno/django-inbound-email
 
-.. image:: https://codecov.io/gh/yunojuno/django-inbound-email/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/yunojuno/django-inbound-email
-
 
 Django Inbound Email
 ====================
 
 An inbound email handler for Django.
+
+**Python3 and Django 2.0**
+
+The latest version of Django, 1.11 is the last to support Python 2, and so
+in advance of the migration to Django 2.0 this package will also now only
+support Python 3 officially. If you need to support earlier Django versions
+please use the ``python27`` branch.
 
 **Current Status**
 

@@ -389,9 +389,9 @@ class SendGridRequestParserTests(TestCase):
         """Test inbound email with attachments."""
         data = sendgrid_payload
         attachment_1 = open(self.test_upload_txt, 'r').read()
-        attachment_2 = open(self.test_upload_png, 'r').read()
+        attachment_2 = open(self.test_upload_png, 'rb').read()
         data['attachment1'] = open(self.test_upload_txt, 'r')
-        data['attachment2'] = open(self.test_upload_png, 'r')
+        data['attachment2'] = open(self.test_upload_png, 'rb')
         request = self.factory.post(self.url, data=data)
         email = self.parser.parse(request)
 
@@ -413,9 +413,9 @@ class SendGridRequestParserTests(TestCase):
         # receive an email
         data = sendgrid_payload
         open(self.test_upload_txt, 'r').read()
-        open(self.test_upload_png, 'r').read()
+        open(self.test_upload_png, 'rb').read()
         data['attachment1'] = open(self.test_upload_txt, 'r')
-        data['attachment2'] = open(self.test_upload_png, 'r')
+        data['attachment2'] = open(self.test_upload_png, 'rb')
         request = self.factory.post(self.url, data=data)
 
         # should except
@@ -489,9 +489,9 @@ class MailgunRequestParserTests(TestCase):
         """Test inbound email with attachments."""
         data = mailgun_payload
         attachment_1 = open(self.test_upload_txt, 'r').read()
-        attachment_2 = open(self.test_upload_png, 'r').read()
+        attachment_2 = open(self.test_upload_png, 'rb').read()
         data['attachment-1'] = open(self.test_upload_txt, 'r')
-        data['attachment-2'] = open(self.test_upload_png, 'r')
+        data['attachment-2'] = open(self.test_upload_png, 'rb')
         request = self.factory.post(self.url, data=data)
         email = self.parser.parse(request)
 
@@ -513,9 +513,9 @@ class MailgunRequestParserTests(TestCase):
         # receive an email
         data = mailgun_payload
         open(self.test_upload_txt, 'r').read()
-        open(self.test_upload_png, 'r').read()
+        open(self.test_upload_png, 'rb').read()
         data['attachment-1'] = open(self.test_upload_txt, 'r')
-        data['attachment-2'] = open(self.test_upload_png, 'r')
+        data['attachment-2'] = open(self.test_upload_png, 'rb')
         request = self.factory.post(self.url, data=data)
 
         # should except
@@ -562,7 +562,6 @@ class MandrillRequestParserTests(TestCase):
                 req_contents = msg['attachments'][name]['content']
                 if is_base64:
                     req_contents = base64.b64decode(req_contents)
-
                 self.assertEqual(req_contents, contents)
                 self.assertEqual(msg['attachments'][name]['type'], mimetype)
             self.assertEqual(e.body, msg['text'])

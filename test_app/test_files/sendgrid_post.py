@@ -59,13 +59,3 @@ Content analysis details:   (0.3 points, 5.0 required)
 
 """
 test_inbound_payload['attachments'] = '1'
-# DEBUG FILES['attachment1']: 'image/png', 318952B
-
-import json
-
-
-def main():
-    print test_inbound_payload['html']
-
-if __name__ == '__main__':
-    main()
