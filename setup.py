@@ -11,7 +11,7 @@ chdir(path.normpath(path.join(path.abspath(__file__), pardir)))
 
 setup(
     name='django-inbound-email',
-    version='0.9.1-dev',
+    version='0.9.2',
     packages=find_packages(),
     install_requires=REQUIREMENTS,
     include_package_data=True,

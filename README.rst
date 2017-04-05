@@ -4,14 +4,13 @@
 .. image:: https://travis-ci.org/yunojuno/django-inbound-email.svg?branch=master
     :target: https://travis-ci.org/yunojuno/django-inbound-email
 
-.. image:: https://codecov.io/gh/yunojuno/django-inbound-email/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/yunojuno/django-inbound-email
-
 
 Django Inbound Email
 ====================
 
 An inbound email handler for Django.
+
+Supports Django 1.8+ and Python 2.7.
 
 **Current Status**
 
