@@ -1,4 +1,3 @@
-# View functions for django-inbound-email
 # -*- coding: utf-8 -*-
 import logging
 
