@@ -1,4 +1,7 @@
 # test contents taken from the Mailgun route tester - https://mailgun.com/cp/routes#
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 test_inbound_payload = {}
 test_inbound_payload['stripped-signature']="""Thanks,
 Bob"""
@@ -165,7 +168,7 @@ test_inbound_payload['body-html']="""<html>
       Bob,
       <br>
       <br>
-      This is Alice. How are you doing?
+      This is Alice. How are you doin©?
       <br>
       <br>
       Thanks,
