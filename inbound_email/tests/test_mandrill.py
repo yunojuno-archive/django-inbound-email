@@ -6,6 +6,7 @@ import base64
 
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
+from django.utils.encoding import smart_bytes
 
 from ..backends.mandrill import MandrillRequestParser
 from ..compat import reverse
@@ -21,9 +22,6 @@ from .test_files.mandrill_post import (
 from .test_files.mandrill_post import (
     post_data_with_attachments_mailbox_2 as mandrill_payload_with_attachments_mailbox_2
 )
-
-DEFAULT_TEST_PARSER = "inbound_email.backends.sendgrid.SendGridRequestParser"
-MANDRILL_REQUEST_PARSER = "inbound_email.backends.mandrill.MandrillRequestParser"
 
 
 class MandrillRequestParserTests(TestCase):
@@ -65,7 +63,7 @@ class MandrillRequestParserTests(TestCase):
                 req_contents = msg['attachments'][name]['content']
                 if is_base64:
                     req_contents = base64.b64decode(req_contents)
-                self.assertEqual(req_contents, contents)
+                self.assertEqual(smart_bytes(req_contents), smart_bytes(contents))
                 self.assertEqual(msg['attachments'][name]['type'], mimetype)
             self.assertEqual(e.body, msg['text'])
 

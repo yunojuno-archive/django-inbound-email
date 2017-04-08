@@ -6,7 +6,7 @@ from os import path
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text, smart_bytes
 
 from ..backends.sendgrid import SendGridRequestParser
 from ..compat import reverse
@@ -14,9 +14,6 @@ from ..errors import RequestParseError, AttachmentTooLargeError
 
 from .test_files.sendgrid_post import test_inbound_payload as sendgrid_payload
 from .test_files.sendgrid_post_windows_1252 import test_inbound_payload_1252
-
-# don't read it out of the settings - fix it here so we know what we're using
-SENDGRID_REQUEST_PARSER = "inbound_email.backends.sendgrid.SendGridRequestParser"
 
 
 class SendGridRequestParserTests(TestCase):
@@ -255,7 +252,7 @@ class SendGridRequestParserTests(TestCase):
 
         # convert list of 3-tuples into dict so we can lookup by filename
         attachments = {k[0]: (k[1], k[2]) for k in email.attachments}
-        self.assertEqual(attachments['test_upload_file.txt'][0], attachment_1)
+        self.assertEqual(smart_bytes(attachments['test_upload_file.txt'][0]), smart_bytes(attachment_1))
         self.assertEqual(attachments['test_upload_file.txt'][1], 'text/plain')
         self.assertEqual(attachments['test_upload_file.jpg'][0], attachment_2)
         self.assertEqual(attachments['test_upload_file.jpg'][1], 'image/jpeg')

@@ -6,14 +6,13 @@ from os import path
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
+from django.utils.encoding import smart_bytes
 
 from ..backends.mailgun import MailgunRequestParser
 from ..compat import reverse
 from ..errors import RequestParseError, AttachmentTooLargeError
 
 from .test_files.mailgun_post import test_inbound_payload as mailgun_payload
-
-SENDGRID_REQUEST_PARSER = "inbound_email.backends.sendgrid.SendGridRequestParser"
 
 
 class MailgunRequestParserTests(TestCase):
@@ -88,7 +87,7 @@ class MailgunRequestParserTests(TestCase):
 
         # convert list of 3-tuples into dict so we can lookup by filename
         attachments = {k[0]: (k[1], k[2]) for k in email.attachments}
-        self.assertEqual(attachments['attachment-1'][0], attachment_1)
+        self.assertEqual(smart_bytes(attachments['attachment-1'][0]), smart_bytes(attachment_1))
         self.assertEqual(attachments['attachment-1'][1], 'text/plain')
         self.assertEqual(attachments['attachment-2'][0], attachment_2)
         self.assertEqual(attachments['attachment-2'][1], 'image/jpeg')
@@ -98,9 +97,9 @@ class MailgunRequestParserTests(TestCase):
         """Test inbound email attachment max size limit."""
         # receive an email
         data = mailgun_payload
-        open(self.test_upload_txt, 'r').read()
+        open(self.test_upload_txt, 'rb').read()
         open(self.test_upload_png, 'rb').read()
-        data['attachment-1'] = open(self.test_upload_txt, 'r')
+        data['attachment-1'] = open(self.test_upload_txt, 'rb')
         data['attachment-2'] = open(self.test_upload_png, 'rb')
         request = self.factory.post(self.url, data=data)
 
