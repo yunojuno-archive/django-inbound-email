@@ -13,7 +13,7 @@ def on_email_received(sender, **kwargs):
     request = kwargs.pop('request', None)
     email = kwargs.pop('email', None)
     logger.debug(
-        u"Sending email from %s straight back to them: '%s'",
+        "Sending email from %s straight back to them: '%s'",
         email.from_email, email.subject
     )
     try:
@@ -23,10 +23,10 @@ def on_email_received(sender, **kwargs):
         email.send()
     except:
         logger.exception(
-            u"Something went wrong with the bounceback. See trace for details."
+            "Something went wrong with the bounceback. See trace for details."
         )
 
 
 if settings.BOUNCEBACK_ENABLED:
-    logger.info(u"Email bounceback feature is enabled.")
+    logger.info("Email bounceback feature is enabled.")
     email_received.connect(on_email_received)

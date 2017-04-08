@@ -88,7 +88,7 @@ class ViewFunctionTests(TestCase):
             settings.INBOUND_EMAIL_PARSER = klass
             request = self.factory.post(self.url, data=payload)
             response = receive_inbound_email(request)
-            self.assertContains(response, u"Successfully parsed", status_code=200)
+            self.assertContains(response, "Successfully parsed", status_code=200)
 
     def test_parse_error_response_200(self):
         """Test the RequestParseErrors are handled correctly, and return HTTP 200."""
@@ -97,14 +97,14 @@ class ViewFunctionTests(TestCase):
             settings.INBOUND_EMAIL_PARSER = klass
             request = self.factory.post(self.url, data={})
             response = receive_inbound_email(request)
-            self.assertContains(response, u"Unable to parse", status_code=200)
+            self.assertContains(response, "Unable to parse", status_code=200)
 
     def test_parse_error_response_400(self):
         """Test the RequestParseErrors are handled correctly, and return HTTP 400."""
         settings.INBOUND_EMAIL_RESPONSE_200 = False
         request = self.factory.post(self.url, data={})
         response = receive_inbound_email(request)
-        self.assertContains(response, u"Unable to parse", status_code=400)
+        self.assertContains(response, "Unable to parse", status_code=400)
 
     def test_email_received_signal(self):
         """Test that a valid POST fires the email_received signal."""
@@ -186,32 +186,32 @@ class SendGridRequestParserTests(TestCase):
         self.assertEqual(
             email.to,
             self.parser._get_addresses(
-                [data.get('to', u'')]
+                [data.get('to', '')]
             )
         )
         self.assertEqual(
             email.from_email,  # NB: This should/will not be a list...
             self.parser._get_addresses(
-                data.get('from', u'')
+                data.get('from', '')
             )[0],  # ...so we don't want a list from _get_addresses either
         )
-        self.assertEqual(email.subject, data.get('subject', u''))
-        self.assertEqual(email.body, data.get('text', u''))
+        self.assertEqual(email.subject, data.get('subject', ''))
+        self.assertEqual(email.body, data.get('text', ''))
         self.assertEqual(
             email.cc,
             self.parser._get_addresses(
-                [data.get('cc', u'')]
+                [data.get('cc', '')]
             )
         )
         self.assertEqual(
             email.bcc,
             self.parser._get_addresses(
-                [data.get('bcc', u'')]
+                [data.get('bcc', '')]
             )
         )
         if 'html' in data:
             self.assertEqual(len(email.alternatives), 1)
-            self.assertEqual(email.alternatives[0][0], data.get('html', u''))
+            self.assertEqual(email.alternatives[0][0], data.get('html', ''))
 
     def setUp(self):
         # Every test needs access to the request factory.
@@ -340,15 +340,15 @@ class SendGridRequestParserTests(TestCase):
             ),
             (
                 # Latin 1 example
-                {"to": u'"McTøst, Sīla" <sīla@exañple.com>'},
+                {"to": '"McTøst, Sīla" <sīla@exañple.com>'},
                 "to",
-                [u'sīla@exañple.com'],
+                ['sīla@exañple.com'],
             ),
             (
                 # real-world edge case example
-                {"to": u""""Polo, Marco" <Marco.Polo@example.com>, "Koti, Shareen" <Shareen.Koti@example.com>, Rudi Cant-Fail <X18@messages.yunojuno.com>"""},  # noqa
+                {"to": """"Polo, Marco" <Marco.Polo@example.com>, "Koti, Shareen" <Shareen.Koti@example.com>, Rudi Cant-Fail <X18@messages.yunojuno.com>"""},  # noqa
                 "to",
-                [u'Marco.Polo@example.com', 'Shareen.Koti@example.com', 'X18@messages.yunojuno.com'],  # noqa
+                ['Marco.Polo@example.com', 'Shareen.Koti@example.com', 'X18@messages.yunojuno.com'],  # noqa
             )
         ]:
 
@@ -445,18 +445,18 @@ class MailgunRequestParserTests(TestCase):
 
         """
         self.assertIsInstance(email, EmailMultiAlternatives)
-        self.assertEqual(email.to, data.get('recipient', u'').split(','))
-        self.assertEqual(email.from_email, data.get('sender', u''))
-        self.assertEqual(email.subject, data.get('subject', u''))
-        self.assertEqual(email.body, u"%s\n\n%s" % (
-            data.get('stripped-text', u''),
-            data.get('stripped-signature', u'')
+        self.assertEqual(email.to, data.get('recipient', '').split(','))
+        self.assertEqual(email.from_email, data.get('sender', ''))
+        self.assertEqual(email.subject, data.get('subject', ''))
+        self.assertEqual(email.body, "%s\n\n%s" % (
+            data.get('stripped-text', ''),
+            data.get('stripped-signature', '')
         ))
-        self.assertEqual(email.cc, data.get('cc', u'').split(','))
-        self.assertEqual(email.bcc, data.get('bcc', u'').split(','))
+        self.assertEqual(email.cc, data.get('cc', '').split(','))
+        self.assertEqual(email.bcc, data.get('bcc', '').split(','))
         if 'html' in data:
             self.assertEqual(len(email.alternatives), 1)
-            self.assertEqual(email.alternatives[0][0], data.get('stripped-html', u''))
+            self.assertEqual(email.alternatives[0][0], data.get('stripped-html', ''))
 
     def setUp(self):
         # Every test needs access to the request factory.
@@ -743,9 +743,9 @@ class MandrillRequestParserTests(TestCase):
             # Handling edge-case or invalid content
             (
                 # Latin 1 example
-                [[u'sīla@exañple.com', u"McTøst, Sīla"]],
+                [['sīla@exañple.com', "McTøst, Sīla"]],
                 "to",
-                [u'"McTøst, Sīla" <sīla@exañple.com>'],
+                ['"McTøst, Sīla" <sīla@exañple.com>'],
             ),
         ]:
 

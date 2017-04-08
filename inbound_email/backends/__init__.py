@@ -47,4 +47,4 @@ class RequestParser():
         cannot be converted successfully.
 
         """
-        raise NotImplementedError(u"Must be implemented by inheriting class.")
+        raise NotImplementedError("Must be implemented by inheriting class.")

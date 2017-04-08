@@ -24,11 +24,11 @@ class MandrillRequestParser(RequestParser):
     """Mandrill request parser. """
 
     def _process_attachments(self, email, attachments):
-        for key, attachment in attachments.items():
+        for key, attachment in list(attachments.items()):
             is_base64 = attachment.get('base64')
             name = attachment.get('name')
             mimetype = attachment.get('type')
-            content = attachment.get('content', u"")
+            content = attachment.get('content', "")
 
             if is_base64:
                 content = base64.b64decode(content)
@@ -40,7 +40,7 @@ class MandrillRequestParser(RequestParser):
 
             if len(content) > self.max_file_size:
                 logger.debug(
-                    u"File attachment %s is too large to process (%sB)",
+                    "File attachment %s is too large to process (%sB)",
                     name,
                     len(content)
                 )
@@ -111,7 +111,7 @@ class MandrillRequestParser(RequestParser):
                 html = msg.get('html', "")
             except (KeyError, ValueError) as ex:
                 raise RequestParseError(
-                    u"Inbound request is missing or got an invalid value.: %s." % ex
+                    "Inbound request is missing or got an invalid value.: %s." % ex
                 )
 
             email = EmailMultiAlternatives(

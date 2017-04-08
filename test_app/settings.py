@@ -44,7 +44,7 @@ try:
     BOUNCEBACK_ENABLED = True
 
 except KeyError as e:
-    print(u"Missing SMTP server environment settings, bounceback is disabled: %s" % e)
+    print(("Missing SMTP server environment settings, bounceback is disabled: %s" % e))
     BOUNCEBACK_ENABLED = False
 
 # set the django DEBUG option

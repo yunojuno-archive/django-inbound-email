@@ -21,10 +21,10 @@ def _log_request(request):
     """Helper function to dump out debug info."""
     logger.debug("Inbound email received")
 
-    for k, v in request.POST.items():
+    for k, v in list(request.POST.items()):
         logger.debug("- POST['%s']='%s'" % (k, v))
 
-    for n, f in request.FILES.items():
+    for n, f in list(request.FILES.items()):
         logger.debug("- FILES['%s']: '%s', %sB", n, f.content_type, f.size)
 
 
@@ -79,8 +79,8 @@ def receive_inbound_email(request):
             status_code = 400
 
         return HttpResponse(
-            u"Unable to parse inbound email: %s" % ex,
+            "Unable to parse inbound email: %s" % ex,
             status=status_code
         )
 
-    return HttpResponse(u"Successfully parsed inbound email.", status=200)
+    return HttpResponse("Successfully parsed inbound email.", status=200)

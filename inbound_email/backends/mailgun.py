@@ -34,7 +34,7 @@ class MailgunRequestParser(RequestParser):
 
         try:
             subject = request.POST.get('subject', '')
-            text = u"%s\n\n%s" % (
+            text = "%s\n\n%s" % (
                 request.POST.get('stripped-text', ''),
                 request.POST.get('stripped-signature', '')
             )
@@ -46,12 +46,12 @@ class MailgunRequestParser(RequestParser):
 
         except MultiValueDictKeyError as ex:
             raise RequestParseError(
-                u"Inbound request is missing required value: %s." % ex
+                "Inbound request is missing required value: %s." % ex
             )
 
         except AttributeError as ex:
             raise RequestParseError(
-                u"Inbound request is missing required value: %s." % ex
+                "Inbound request is missing required value: %s." % ex
             )
 
         email = EmailMultiAlternatives(
@@ -66,10 +66,10 @@ class MailgunRequestParser(RequestParser):
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.items():
+        for n, f in list(request.FILES.items()):
             if f.size > self.max_file_size:
                 logger.debug(
-                    u"File attachment %s is too large to process (%sB)",
+                    "File attachment %s is too large to process (%sB)",
                     f.name,
                     f.size
                 )

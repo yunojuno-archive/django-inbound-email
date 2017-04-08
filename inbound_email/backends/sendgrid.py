@@ -107,16 +107,16 @@ class SendGridRequestParser(RequestParser):
 
         except IndexError as ex:
             raise RequestParseError(
-                u"Inbound request lacks a valid from address: %s." % request.get('from')
+                "Inbound request lacks a valid from address: %s." % request.get('from')
             )
 
         except MultiValueDictKeyError as ex:
-            raise RequestParseError(u"Inbound request is missing required value: %s." % ex)
+            raise RequestParseError("Inbound request is missing required value: %s." % ex)
 
         if "@" not in from_email:
             # Light sanity check for potential issues related to taking just the
             # first element of the 'from' address list
-            raise RequestParseError(u"Could not get a valid from address out of: %s." % request)
+            raise RequestParseError("Could not get a valid from address out of: %s." % request)
 
         email = EmailMultiAlternatives(
             subject=subject,
@@ -130,10 +130,10 @@ class SendGridRequestParser(RequestParser):
             email.attach_alternative(html, "text/html")
 
         # TODO: this won't cope with big files - should really read in in chunks
-        for n, f in request.FILES.items():
+        for n, f in list(request.FILES.items()):
             if f.size > self.max_file_size:
                 logger.debug(
-                    u"File attachment %s is too large to process (%sB)",
+                    "File attachment %s is too large to process (%sB)",
                     f.name,
                     f.size
                 )
