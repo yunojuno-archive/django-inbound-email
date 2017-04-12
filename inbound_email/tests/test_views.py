@@ -6,11 +6,12 @@ from os import path
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
 
 from ..errors import (
-    AttachmentTooLargeError
+    AttachmentTooLargeError,
+    AuthenticationError,
 )
 from ..signals import email_received, email_received_unacceptable
 from ..views import receive_inbound_email, _log_request
@@ -152,3 +153,33 @@ class ViewFunctionTests(TestCase):
             receive_inbound_email(request)
             self.assertTrue(self.on_email_received_fired, klass)
             email_received_unacceptable.disconnect(on_email_received)
+
+    @override_settings(INBOUND_MANDRILL_AUTHENTICATION_KEY='mandrill_key')
+    def test_email_received_unacceptable_signal_fired_for_mandrill_mistmatch_signature(self):
+        parser = MANDRILL_REQUEST_PARSER
+        payload = mandrill_payload
+        settings.INBOUND_EMAIL_PARSER = parser
+        _payload = payload.copy()
+
+        # define handler
+        def on_email_received(sender, **kwargs):
+            self.on_email_received_fired = True
+            request = kwargs.pop('request', None)
+            email = kwargs.pop('email', None)
+            exception = kwargs.pop('exception', None)
+            self.assertEqual(sender.__name__, parser.split('.')[-1])
+            self.assertIsNotNone(request)
+            self.assertIsNone(email,)
+            self.assertIsInstance(exception, AuthenticationError)
+        email_received_unacceptable.connect(on_email_received)
+
+        self.on_email_received_fired = False
+
+        request = self.factory.post(
+            self.url,
+            data=_payload,
+            HTTP_X_MANDRILL_SIGNATURE='invalid_signature',
+        )
+        receive_inbound_email(request)
+        self.assertTrue(self.on_email_received_fired, parser)
+        email_received_unacceptable.disconnect(on_email_received)

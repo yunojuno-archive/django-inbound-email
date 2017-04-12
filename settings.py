@@ -25,6 +25,10 @@ INBOUND_EMAIL_PARSER = environ.get(
     'django_inbound_email.backends.sendgrid.SendGridRequestParser'
 )
 
+# The authentication key provided by Mandrill. If supplied, the
+# X-Mandrill-Signature header on the request will be verified during parsing.
+INBOUND_MANDRILL_AUTHENTICATION_KEY = environ.get('INBOUND_EMAIL_PARSER')
+
 # whether to dump out a log of all incoming email requests
 INBOUND_EMAIL_LOG_REQUESTS = environ.get('INBOUND_EMAIL_LOG_REQUESTS', 'false').lower() == 'true'
 

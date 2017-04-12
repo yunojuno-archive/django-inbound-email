@@ -8,7 +8,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .backends import get_backend_instance
-from .errors import RequestParseError, AttachmentTooLargeError
+from .errors import (
+    RequestParseError,
+    AttachmentTooLargeError,
+    AuthenticationError,
+)
 from .signals import email_received, email_received_unacceptable
 
 
@@ -63,6 +67,14 @@ def receive_inbound_email(request):
         email_received_unacceptable.send(
             sender=backend.__class__,
             email=ex.email,
+            request=request,
+            exception=ex
+        )
+    except AuthenticationError as ex:
+        logger.exception(ex)
+        email_received_unacceptable.send(
+            sender=backend.__class__,
+            email=None,
             request=request,
             exception=ex
         )

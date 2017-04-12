@@ -1,23 +1,59 @@
 # encoding=utf-8
+from __future__ import unicode_literals
+
 import re
+import hashlib
+import hmac
 import json
 import logging
 import base64
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.encoding import smart_bytes
 
 from ..backends import RequestParser
-from ..errors import RequestParseError, AttachmentTooLargeError
+from ..errors import (
+    RequestParseError,
+    AttachmentTooLargeError,
+    AuthenticationError,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class MandrillSignatureMismatchError(AuthenticationError):
+    """Error raised when the request's mandrill signature doesn't match.
+    """
+
+    def __init__(self, request, expected, calculated):
+        super(MandrillSignatureMismatchError, self)
+        self.request = request
+        self.expected_signature = expected
+        self.calculated_signature = calculated
 
 
 def _detect_base64(s):
     """Quite an ingenuous function to guess if a string is base64 encoded
     """
     return (len(s) % 4 == 0) and re.match('^[A-Za-z0-9+/]+[=]{0,2}$', s)
+
+
+def _check_mandrill_signature(request, key):
+    expected = request.META.get('HTTP_X_MANDRILL_SIGNATURE', None)
+    url = request.build_absolute_uri()
+    # Mandrill appends the POST params in alphabetical order of the key.
+    params = sorted(request.POST.items(), key=lambda x: x[0])
+    message = url + ''.join(key + value for key, value in params)
+    signed_binary = hmac.new(
+        key.encode('utf-8'),
+        message.encode('utf-8'),
+        hashlib.sha1,
+    )
+    signature = base64.b64encode(signed_binary.digest()).decode('utf-8')
+    if signature != expected:
+        raise MandrillSignatureMismatchError(request, expected, signature)
 
 
 class MandrillRequestParser(RequestParser):
@@ -82,6 +118,13 @@ class MandrillRequestParser(RequestParser):
             a list of EmailMultiAlternatives instances
         """
         assert isinstance(request, HttpRequest), "Invalid request type: %s" % type(request)
+
+        if settings.INBOUND_MANDRILL_AUTHENTICATION_KEY:
+            _check_mandrill_signature(
+                request=request,
+                key=settings.INBOUND_MANDRILL_AUTHENTICATION_KEY,
+            )
+
         try:
             messages = json.loads(request.POST['mandrill_events'])
         except (ValueError, KeyError) as ex:

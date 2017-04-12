@@ -226,6 +226,18 @@ Configuration
     )
 
 
+Mandrill Features
+-----------------
+
+If you wish to check the X-Mandrill-Signature header that Mandrill provides
+in the requests, you will need to set the
+``INBOUND_MANDRILL_AUTHENTICATION_KEY`` setting to your Mandrill
+authentication key. When the key is supplied Inbound Email will check the
+signature supplied versus the one calculated from the request.
+
+If signatures don't match, the system will send the signal
+``email_received_unacceptable`` with the exception describing the problem.
+
 Features
 --------
 
