@@ -102,7 +102,7 @@ class SendGridRequestParser(RequestParser):
             bcc = self._get_addresses([_decode_POST_value(request, 'bcc', default='')])
 
             subject = _decode_POST_value(request, 'subject')
-            text = _decode_POST_value(request, 'text')
+            text = _decode_POST_value(request, 'text', default='')
             html = _decode_POST_value(request, 'html', default='')
 
         except IndexError as ex:

@@ -235,6 +235,14 @@ class SendGridRequestParserTests(TestCase):
         email = self.parser.parse(request)
         self._assertEmailParsedCorrectly(email, sendgrid_payload)
 
+    def test_text_html_only(self):
+        """Test inbound email with no text body."""
+        data = sendgrid_payload
+        del data['text']
+        request = self.factory.post(self.url, data=data)
+        email = self.parser.parse(request)
+        self._assertEmailParsedCorrectly(email, sendgrid_payload)
+
     def test_attachments(self):
         """Test inbound email with attachments."""
         data = sendgrid_payload
