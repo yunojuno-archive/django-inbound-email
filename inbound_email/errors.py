@@ -12,3 +12,8 @@ class AttachmentTooLargeError(Exception):
         self.email = email
         self.filename = filename
         self.size = size
+
+
+class AuthenticationError(Exception):
+    """Error raised when the request is not authenticated."""
+    pass

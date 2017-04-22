@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import hashlib
+import hmac
 import json
 import base64
 
@@ -8,7 +10,10 @@ from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
 from django.utils.encoding import smart_bytes
 
-from ..backends.mandrill import MandrillRequestParser
+from ..backends.mandrill import (
+    MandrillRequestParser,
+    MandrillSignatureMismatchError,
+)
 from ..compat import reverse
 from ..errors import RequestParseError, AttachmentTooLargeError
 
@@ -67,6 +72,18 @@ class MandrillRequestParserTests(TestCase):
                 self.assertEqual(msg['attachments'][name]['type'], mimetype)
             self.assertEqual(e.body, msg['text'])
 
+    def _calculate_signature(self, url, data, key):
+        # Mandrill appends the POST params in alphabetical order of the key.
+        params = sorted(data, key=lambda x: x[0])
+        message = url + ''.join(key + value for key, value in params)
+        signed_binary = hmac.new(
+            key.encode('utf-8'),
+            message.encode('utf-8'),
+            hashlib.sha1,
+        )
+        signature = base64.b64encode(signed_binary.digest())
+        return signature.decode('utf-8')
+
     def test_parse_valid_request__with_attachments__from_mailbox(self):
         "Test email sent via Mailbox app without body text "
         request = self.factory.post(self.url, data=mandrill_payload_with_attachments_mailbox)
@@ -117,6 +134,35 @@ class MandrillRequestParserTests(TestCase):
         request = self.factory.post(self.url, data=mandrill_payload_with_attachments)
         emails = self.parser.parse(request)
         self._assertEmailParsedCorrectly(emails, mandrill_payload_with_attachments)
+
+    @override_settings(INBOUND_MANDRILL_AUTHENTICATION_KEY='mandrill_key')
+    def test_parse_valid_request__with_signature(self):
+        signature = self._calculate_signature(
+            url='http://testserver' + self.url,
+            data=mandrill_payload.items(),
+            key='mandrill_key',
+        )
+        request = self.factory.post(
+            self.url,
+            data=mandrill_payload,
+            HTTP_X_MANDRILL_SIGNATURE=signature,
+        )
+        emails = self.parser.parse(request)
+        self._assertEmailParsedCorrectly(emails, mandrill_payload)
+
+    @override_settings(INBOUND_MANDRILL_AUTHENTICATION_KEY='mandrill_key')
+    def test_parse_valid_request__with_invalid_signature(self):
+        signature = 'invalid_signature'
+        request = self.factory.post(
+            self.url,
+            data=mandrill_payload,
+            HTTP_X_MANDRILL_SIGNATURE=signature,
+        )
+        self.assertRaises(
+            MandrillSignatureMismatchError,
+            self.parser.parse,
+            request,
+        )
 
     def _process_dump(self, foo):
         dump = json.loads(self.payload['mandrill_events'])
