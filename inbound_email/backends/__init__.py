@@ -1,4 +1,3 @@
-# package definition file for django_inbound_email.backends
 from importlib import import_module
 
 from django.conf import settings

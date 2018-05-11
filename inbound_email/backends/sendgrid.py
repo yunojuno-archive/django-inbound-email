@@ -1,4 +1,3 @@
-# sendgrid specific request parser.
 import json
 import logging
 

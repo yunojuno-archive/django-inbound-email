@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from os import path
 
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
+from django.urls import reverse
 from django.utils.encoding import smart_text, smart_bytes
 
 from ..backends.sendgrid import SendGridRequestParser
-from ..compat import reverse
 from ..errors import RequestParseError, AttachmentTooLargeError
 
 from .test_files.sendgrid_post import test_inbound_payload as sendgrid_payload
