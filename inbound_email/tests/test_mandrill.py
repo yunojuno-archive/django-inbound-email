@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import hashlib
 import hmac
 import json
@@ -8,13 +5,13 @@ import base64
 
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
+from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
 from ..backends.mandrill import (
     MandrillRequestParser,
     MandrillSignatureMismatchError,
 )
-from ..compat import reverse
 from ..errors import RequestParseError, AttachmentTooLargeError
 
 from .test_files.mandrill_post import post_data as mandrill_payload

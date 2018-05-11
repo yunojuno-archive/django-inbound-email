@@ -8,6 +8,8 @@
 Django Inbound Email
 ====================
 
+**This package now supports Python3 and Django1.11 or above. For previous version support please refer to the Python2 branch.**
+
 An inbound email handler for Django.
 
 **Current Status**

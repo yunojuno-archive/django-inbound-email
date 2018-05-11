@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# Mailgun specific request parser. See http://www.mailgun.com/inbound-routing
 import logging
 
 from django.core.mail import EmailMultiAlternatives
