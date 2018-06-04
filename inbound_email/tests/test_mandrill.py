@@ -14,19 +14,16 @@ from ..backends.mandrill import (
 )
 from ..errors import RequestParseError, AttachmentTooLargeError
 
-from .test_files.mandrill_post import post_data as mandrill_payload
 from .test_files.mandrill_post import (
-    post_data_with_attachments as mandrill_payload_with_attachments
-)
-from .test_files.mandrill_post import (
-    post_data_with_attachments_mailbox as mandrill_payload_with_attachments_mailbox
-)
-from .test_files.mandrill_post import (
-    post_data_with_attachments_mailbox_2 as mandrill_payload_with_attachments_mailbox_2
+    post_data as mandrill_payload,
+    post_data_with_attachments as mandrill_payload_with_attachments,
+    post_data_with_attachments_mailbox as mandrill_payload_with_attachments_mailbox,
+    post_data_with_attachments_mailbox_2 as mandrill_payload_with_attachments_mailbox_2,
 )
 
 
 class MandrillRequestParserTests(TestCase):
+
     def setUp(self):
         self.url = reverse('receive_inbound_email')
         self.factory = RequestFactory()
@@ -35,7 +32,7 @@ class MandrillRequestParserTests(TestCase):
         self.payload_with_attachments = mandrill_payload_with_attachments
 
     def _assertEmailParsedCorrectly(self, emails, mandrill_payload, has_html=True):
-        def _parse_to(to):
+        def _parse_emails(to):
             ret = []
             for address, name in to:
                 if not name:
@@ -52,7 +49,9 @@ class MandrillRequestParserTests(TestCase):
         for i, e in enumerate(emails):
             msg = json.loads(mandrill_payload['mandrill_events'])[i]['msg']
             self.assertEqual(e.subject, msg['subject'])
-            self.assertEqual(e.to, _parse_to(msg['to']))
+            self.assertEqual(e.to, _parse_emails(msg['to']))
+            self.assertEqual(e.cc, _parse_emails(msg['cc']))
+            self.assertEqual(e.bcc, _parse_emails(msg['bcc']))
             self.assertEqual(
                 e.from_email,
                 _parse_from(msg.get('from_name'), msg.get('from_email'))

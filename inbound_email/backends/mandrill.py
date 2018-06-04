@@ -141,6 +141,8 @@ class MandrillRequestParser(RequestParser):
             try:
                 from_email = msg['from_email']
                 to = list(self._get_recipients(msg['to']))
+                cc = list(self._get_recipients(msg['cc'])) if 'cc' in msg else []
+                bcc = list(self._get_recipients(msg['bcc'])) if 'bcc' in msg else []
 
                 subject = msg.get('subject', "")
 
@@ -162,6 +164,8 @@ class MandrillRequestParser(RequestParser):
                     from_name=msg.get('from_name'),
                 ),
                 to=to,
+                cc=cc,
+                bcc=bcc,
             )
             if html is not None and len(html) > 0:
                 email.attach_alternative(html, "text/html")

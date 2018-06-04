@@ -100,6 +100,18 @@ post_data_json = [
                     None
                 ]
             ],
+            "cc": [
+                [
+                    "example-cc@example.com",
+                    None
+                ]
+            ],
+            "bcc": [
+                [
+                    "example-bcc@example.com",
+                    None
+                ]
+            ],
             "from_email": "example.sender@mandrillapp.com",
             "headers": {
                 "Received": [
