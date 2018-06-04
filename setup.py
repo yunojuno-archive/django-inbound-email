@@ -8,7 +8,7 @@ chdir(path.normpath(path.join(path.abspath(__file__), pardir)))
 
 setup(
     name='django-inbound-email',
-    version='0.12',
+    version='0.13',
     packages=find_packages(),
     install_requires=['Django>=1.11'],
     include_package_data=True,
