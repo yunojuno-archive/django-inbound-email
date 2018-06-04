@@ -100,6 +100,18 @@ post_data_json = [
                     None
                 ]
             ],
+            "cc": [
+                [
+                    "example-cc@example.com",
+                    None
+                ]
+            ],
+            "bcc": [
+                [
+                    "example-bcc@example.com",
+                    None
+                ]
+            ],
             "from_email": "example.sender@mandrillapp.com",
             "headers": {
                 "Received": [
@@ -116,6 +128,8 @@ post_data_json = [
                 ],
                 "Domainkey-Signature": "a=rsa-sha1; c=nofws; q=dns; s=mandrill; d=mail115.us4.mandrillapp.com; b=X6qudHd4oOJvVQZcoAEUCJgB875SwzEO5UKf6NvpfqyCVjdaO79WdDulLlfNVELeuoK2m6alt2yw 5Qhp4TW5NegyFf6Ogr/Hy0Lt411r/0lRf0nyaVkqMM/9g13B6D9CS092v70wshX8+qdyxK8fADw8 kEelbCK2cEl0AGIeAeo=;",
                 "To": "<example@example.com>",
+                "CC": "<example-cc@example.com>",
+                "BCC": "<example-bcc@example.com>",
                 "Mime-Version": "1.0",
                 "List-Unsubscribe": "<mailto:unsubscribe-md_999.aaaaaaaa.v1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mailin1.us2.mcsv.net?subject=unsub>",
                 "Message-Id": "<999.20130510192820.aaaaaaaaaaaaaa.aaaaaaaa@mail115.us4.mandrillapp.com>",
@@ -226,6 +240,18 @@ post_data_json = [
                     None
                 ]
             ],
+            "cc": [
+                [
+                    "example-cc@example.com",
+                    None
+                ]
+            ],
+            "bcc": [
+                [
+                    "example-bcc@example.com",
+                    None
+                ]
+            ],
             "from_email": "example.sender@mandrillapp.com",
             "headers": {
                 "Received": [
@@ -242,6 +268,8 @@ post_data_json = [
                 ],
                 "Domainkey-Signature": "a=rsa-sha1; c=nofws; q=dns; s=mandrill; d=mail115.us4.mandrillapp.com; b=X6qudHd4oOJvVQZcoAEUCJgB875SwzEO5UKf6NvpfqyCVjdaO79WdDulLlfNVELeuoK2m6alt2yw 5Qhp4TW5NegyFf6Ogr/Hy0Lt411r/0lRf0nyaVkqMM/9g13B6D9CS092v70wshX8+qdyxK8fADw8 kEelbCK2cEl0AGIeAeo=;",
                 "To": "<example@example.com>",
+                "CC": "<example-cc@example.com>",
+                "BCC": "<example-bcc@example.com>",
                 "Mime-Version": "1.0",
                 "List-Unsubscribe": "<mailto:unsubscribe-md_999.aaaaaaaa.v1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mailin1.us2.mcsv.net?subject=unsub>",
                 "Message-Id": "<999.20130510192820.aaaaaaaaaaaaaa.aaaaaaaa@mail115.us4.mandrillapp.com>",
@@ -291,6 +319,18 @@ post_data_with_attachments_json = [
                     "Hugo"
                 ]
             ],
+            "cc": [
+                [
+                    "example-cc@example.com",
+                    None
+                ]
+            ],
+            "bcc": [
+                [
+                    "example-bcc@example.com",
+                    None
+                ]
+            ],
             "email": "hugo@example.com",
             "headers": {
                 "Received": [
@@ -301,6 +341,8 @@ post_data_with_attachments_json = [
                 "From": "Vincenzo <vince@example-email.com>",
                 "X-Google-Dkim-Signature": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=1e100.net; s=20130820; h=x-gm-message-state:mime-version:in-reply-to:references:date :message-id:subject:from:to:content-type; bh=8ctpVbrubLQ2/ycHWqebhhoYXGNwL4SQehME0weGkg0=; b=Q9JgnhMVivi5LHVX81C3cUV5ey4ijZtle1p73tNIEZNHJLQnHUU3bpitwD5u3svyqY 85TfKoEsmUfq0i3klSo+ECnuZFFe5/Dpz7Aq0kNalEdAXg8LFw/Su9jXiChPgro962e8 qcw8HpY0DhIcAvQOJ50lRM5mCW34IylHQG5ArUIfO9Gc+zeq7nSWAlAXZ9xVtazZnWK2 UNux6ScHmLuqm5RqHeFWKHD+yD0pDIpeRnz0jghlpwYRhM9PjogwVN6JgFxMGaIgYK+Q aeYIhvkO6Q7QO/DNmpzBw5g3MHWTpMPZJdxzUJkWdAB+w5LR2aOaDrZ4w2S3dUsYLyhx eogg==",
                 "To": "Hugo <hugo@example.com>",
+                "CC": "Example CC <example-cc@example.com>",
+                "BCC": "Example BCC <example-bcc@example.com>",
                 "X-Received": "by 10.50.137.100 with SMTP id qh4mr3649889igb.1.1431099850367; Fri, 08 May 2015 08:44:10 -0700 (PDT)",
                 "X-Gm-Message-State": "ALoCoQnKB87E+ndq9gmFG2NOzvFTV+aqYAxvb7XCIJJYN3bREJq0R5LQ7N6aow4qMDbOKcEhys03",
                 "References": "<CAEGWL=W2g0J7kK2oL5RtS3zcmxpOgTHSGOwX0VxbtDnBeaRHHQ@mail.gmail.com> <CAEGWL=VB78EjAzVEyxWkEno9rFP0jMGuEusj1+VFr54ipXtz8Q@mail.gmail.com>",
