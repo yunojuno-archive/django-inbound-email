@@ -88,7 +88,7 @@ class MandrillRequestParserTests(TestCase):
         payload = json.loads(mandrill_payload_with_attachments_mailbox['mandrill_events'])
 
         self.assertEqual(len(email.attachments), 1)
-        self.assertEqual(email.attachments[0][0], '3c8e4ffb-6366-4351-813f-d0f600ed720e')
+        self.assertEqual(email.attachments[0][0], 'Hydrofoil_en_Kitesurf.jpg')
         self.assertEqual(email.attachments[0][2], 'image/jpeg')
         self.assertEqual(
             email.attachments[0][1],
@@ -107,7 +107,7 @@ class MandrillRequestParserTests(TestCase):
         payload = json.loads(mandrill_payload_with_attachments_mailbox_2['mandrill_events'])
 
         self.assertEqual(len(email.attachments), 1)
-        self.assertEqual(email.attachments[0][0], '7e357447-3f2e-4c12-a643-5720f30ca7af')
+        self.assertEqual(email.attachments[0][0], 'Hydrofoil_en_Kitesurf.jpg')
         self.assertEqual(email.attachments[0][2], 'image/jpeg')
         self.assertEqual(
             email.attachments[0][1],
