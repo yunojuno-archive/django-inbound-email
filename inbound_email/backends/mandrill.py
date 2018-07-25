@@ -4,6 +4,7 @@ import hmac
 import json
 import logging
 import base64
+from email import message_from_string
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -56,10 +57,19 @@ def _check_mandrill_signature(request, key):
 class MandrillRequestParser(RequestParser):
     """Mandrill request parser. """
 
-    def _process_attachments(self, email, attachments):
+    def _process_attachments(self, email, attachments, raw_message):
+        message = message_from_string(raw_message)
+        inline_filenames = {}
+        for part in message.walk():
+            filename = part.get_filename()
+            content_id = part.get('Content-Id', None)
+            if filename and content_id:
+                inline_filenames[content_id.replace('<', '').replace('>', '')] = filename
+
         for key, attachment in list(attachments.items()):
             is_base64 = attachment.get('base64')
             name = attachment.get('name')
+            name = inline_filenames.get(name, name)
             mimetype = attachment.get('type')
             content = attachment.get('content', "")
 
@@ -170,7 +180,7 @@ class MandrillRequestParser(RequestParser):
             if html is not None and len(html) > 0:
                 email.attach_alternative(html, "text/html")
 
-            email = self._process_attachments(email, attachments)
+            email = self._process_attachments(email, attachments, msg['raw_msg'])
             emails.append(email)
 
         return emails
