@@ -77,7 +77,11 @@ class MandrillRequestParser(RequestParser):
                 content = base64.b64decode(content)
             # watchout: sometimes attachment contents are base64'd but mandrill doesn't set the flag
             elif _detect_base64(content):
-                content = base64.b64decode(content)
+                try:
+                    content = base64.b64decode(content)
+                except binascii.Error:
+                    # unable to base 64 decode. Let's just assume it is not actually base64 encoded
+                    pass
 
             content = smart_bytes(content, strings_only=True)
 
