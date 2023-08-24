@@ -6,7 +6,7 @@ from email.utils import getaddresses
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest
 from django.utils.datastructures import MultiValueDictKeyError
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from ..backends import RequestParser
 from ..errors import RequestParseError, AttachmentTooLargeError
@@ -42,7 +42,7 @@ def _decode_POST_value(request, field_name, default=None):
     if charset.lower() != 'utf-8':
         logger.debug("Incoming email field '%s' has %s encoding.", field_name, charset)
 
-    return smart_text(value, encoding=charset)
+    return smart_str(value, encoding=charset)
 
 
 class SendGridRequestParser(RequestParser):

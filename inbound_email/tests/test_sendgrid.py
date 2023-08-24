@@ -4,7 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase, override_settings
 from django.test.client import RequestFactory
 from django.urls import reverse
-from django.utils.encoding import smart_text, smart_bytes
+from django.utils.encoding import smart_str, smart_bytes
 
 from ..backends.sendgrid import SendGridRequestParser
 from ..errors import RequestParseError, AttachmentTooLargeError
@@ -282,4 +282,4 @@ class SendGridRequestParserTests(TestCase):
         data = test_inbound_payload_1252
         request = self.factory.post(self.url, data=data)
         email = self.parser.parse(request)
-        self.assertEqual(email.body, smart_text(data['text']))
+        self.assertEqual(email.body, smart_str(data['text']))
